@@ -1,35 +1,32 @@
 {
   "components/dynamic-map-components.tsx -> ./bounding-box-map": {
-    "id": 2363,
+    "id": "components/dynamic-map-components.tsx -> ./bounding-box-map",
     "files": [
-      "static/chunks/363.e50e75d0ac932425.js"
+      "static/chunks/_app-pages-browser_components_bounding-box-map_tsx.js"
     ]
   },
   "components/dynamic-map-components.tsx -> ./map-view": {
-    "id": 3337,
+    "id": "components/dynamic-map-components.tsx -> ./map-view",
     "files": [
-      "static/chunks/337.69d71212250fc351.js"
+      "static/chunks/_app-pages-browser_components_map-view_tsx.js"
     ]
   },
   "components/dynamic-map-components.tsx -> ./record-details-dialog": {
-    "id": 9061,
+    "id": "components/dynamic-map-components.tsx -> ./record-details-dialog",
     "files": [
-      "static/chunks/187-9a274b79056dc0b2.js",
-      "static/chunks/476.a84f42a0983bd683.js",
-      "static/chunks/61.608f739e0e51a76c.js"
+      "static/chunks/_app-pages-browser_components_record-details-dialog_tsx.js"
     ]
   },
   "components/dynamic-map-components.tsx -> ./records-map": {
-    "id": 4025,
+    "id": "components/dynamic-map-components.tsx -> ./records-map",
     "files": [
-      "static/chunks/25.a5a720fbb05849e8.js"
+      "static/chunks/_app-pages-browser_components_records-map_tsx.js"
     ]
   },
   "components/records-map.tsx -> @/components/google-map": {
-    "id": 4856,
+    "id": "components/records-map.tsx -> @/components/google-map",
     "files": [
-      "static/chunks/4e6af11a.cae2528298cdfa3c.js",
-      "static/chunks/856.b95bc37df3188ca7.js"
+      "static/chunks/_app-pages-browser_components_google-map_tsx.js"
     ]
   }
 }
