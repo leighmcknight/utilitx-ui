@@ -346,7 +346,7 @@ export function UploadForm() {
         setLoading(false);
       }
       // Navigate to records page
-      // router.push("/records")
+      router.push("/records")
     } catch (error) {
       toast({
         title: "Upload failed",
