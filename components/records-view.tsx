@@ -38,46 +38,29 @@ export function RecordsView() {
   // Use uploaded records
   const displayRecords = workingRecords.length > 0 ? workingRecords : []
   const isEmpty = displayRecords.length === 0
-
-  console.log("Records:", records)
-  console.log("Display Records:", displayRecords)
-  console.log("Working Records:", workingRecords)
   
   // Get unique sources for filters
-  const sources = Array.from(new Set(displayRecords.map((record) => record.georeference?.source).filter(Boolean)))
-  console.log("Sources:", sources)
+  const sources = Array.from(new Set(displayRecords.map((record) => record.metadata.georeference?.source).filter(Boolean)))
 
   const filteredRecords = displayRecords.filter((record) => {
-    console.log("Filtering Record:", record)
-
     record.text_blob_summary = record.text_blob_summary || "Summary of utility drawing..."
     
-    console.log(record.text_blob_summary)
-    console.log(record.georeference)
-    
     // Ensure all properties exist before accessing them
-    if (!record.text_blob_summary || !record.georeference) return false
-
-
+    if (!record.text_blob_summary || !record.metadata.georeference) return false
+  
     // Text search in summary or intersection
     const summaryMatch = record.text_blob_summary.toLowerCase().includes(searchQuery.toLowerCase())
-    console.log("Summary Match:", summaryMatch)
+    const intersectionMatch = record.metadata.georeference.intersection &&
+    record.metadata.georeference.intersection.toString().toLowerCase().includes(searchQuery.toLowerCase())
 
-    const intersectionMatch = record.georeference.intersection 
-      // record.georeference.intersection.toLowerCase().includes(searchQuery.toLowerCase())
-
-    const addressMatch =
-      record.georeference.address && record.georeference.address.toLowerCase().includes(searchQuery.toLowerCase())
-
-    const matchesSearch = searchQuery === "" || summaryMatch || intersectionMatch || addressMatch
-
+    const addressMatch = record.metadata.georeference.address && record.metadata.georeference.address.toLowerCase().includes(searchQuery.toLowerCase());  
+    const matchesSearch = searchQuery === "" || summaryMatch || intersectionMatch || addressMatch;
+    
     // Source filter
-    const matchesSource =
-      sourceFilter.length === 0 || (record.georeference.source && sourceFilter.includes(record.georeference.source))
-
+    const matchesSource = sourceFilter.length === 0 || (record.metadata.georeference.source && sourceFilter.includes(record.metadata.georeference.source))
+  
     return matchesSearch && matchesSource
-  })
-  console.log("Filtered Records:", filteredRecords)
+  });
 
   const handleRecordSelect = (id: string) => {
     setSelectedRecord(id === selectedRecord ? null : id)
@@ -97,20 +80,28 @@ export function RecordsView() {
 
   // Function to get a unique ID for each record
   const getRecordId = (record: AssetRecord, index: number) => {
-    if (!record.georeference) return `record-${index}`
-    return `${record.georeference.lat}-${record.georeference.lon}-${index}`
+    if (!record.metadata.georeference) return `record-${index}`
+    // TODO: REMOVE THIS LOGGING
+    // console.log("record.metadata.georeference: ", record.metadata.georeference)
+    return `${record.metadata.georeference.lat}-${record.metadata.georeference.lon}-${index}`
   }
-
+  
   // Calculate stats
   const totalRecords = displayRecords.length
-  const lowConfidenceCount = displayRecords.filter((r) => r.georeference?.conf < 0.7).length
+  // TODO: REMOVE THIS LOGGING
+  // console.log("totalRecords: ", totalRecords)
+  const lowConfidenceCount = displayRecords.filter((r) => r.metadata.georeference?.conf < 0.7).length
+  // TODO: REMOVE THIS LOGGING
+  // console.log("lowConfidenceCount: ", lowConfidenceCount)
   const avgTrustScore =
     displayRecords.length > 0
-      ? Math.round(
-          (displayRecords.reduce((sum, r) => sum + (r.georeference?.trust_score || 0), 0) / displayRecords.length) *
-            100,
-        )
-      : 0
+    ? Math.round(
+      (displayRecords.reduce((sum, r) => sum + (r.metadata.georeference?.trust_score || 0), 0) / displayRecords.length) *
+      100,
+    )
+    : 0
+    // TODO: REMOVE THIS LOGGING
+  // console.log("avgTrustScore: ", avgTrustScore)
 
   if (isEmpty) {
     return (
