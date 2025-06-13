@@ -27,10 +27,16 @@ export function RecordsMap({ records, selectedRecord, onSelectRecord, onRecordUp
   const { toast } = useToast()
   const isMobile = useMobile()
 
+  console.log("records: ", records)
+  console.log("selectedRecord: ", selectedRecord)
+  console.log("onSelectRecord: ", onSelectRecord)
+  console.log("onRecordUpdate: ", onRecordUpdate)
+  console.log("getRecordId: ", getRecordId)
+
   // Filter records with valid georeference data
   const validRecords = records.filter(
     (record) =>
-      record.georeference && typeof record.georeference.lat === "number" && typeof record.georeference.lon === "number",
+      record.metadata.georeference && typeof record.metadata.georeference.lat === "number" && typeof record.metadata.georeference.lon === "number",
   )
 
   return (

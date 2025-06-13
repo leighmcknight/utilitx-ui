@@ -71,7 +71,7 @@ export default function GoogleMapComponent({
   // Filter records with valid georeference data
   const validRecords = records.filter(
     (record) =>
-      record.georeference && typeof record.georeference.lat === "number" && typeof record.georeference.lon === "number",
+      record.metadata.georeference && typeof record.metadata.georeference.lat === "number" && typeof record.metadata.georeference.lon === "number",
   )
 
   // Calculate bounds to fit all markers
@@ -81,8 +81,8 @@ export default function GoogleMapComponent({
     const bounds = new window.google.maps.LatLngBounds()
     validRecords.forEach((record) => {
       bounds.extend({
-        lat: record.georeference.lat,
-        lng: record.georeference.lon,
+        lat: record.metadata.georeference.lat,
+        lng: record.metadata.georeference.lon,
       })
     })
     return bounds
@@ -112,8 +112,8 @@ export default function GoogleMapComponent({
         // Center the map on the selected record
         if (mapRef.current) {
           mapRef.current.panTo({
-            lat: record.georeference.lat,
-            lng: record.georeference.lon,
+            lat: record.metadata.georeference.lat,
+            lng: record.metadata.georeference.lon,
           })
         }
       }
@@ -154,11 +154,11 @@ export default function GoogleMapComponent({
     const updatedRecord = {
       ...record,
       georeference: {
-        ...record.georeference,
+        ...record.metadata.georeference,
         lat: newLat,
         lon: newLng,
         // Mark as manually adjusted
-        source: record.georeference.source ? `${record.georeference.source} (adjusted)` : "manually adjusted",
+        source: record.metadata.georeference.source ? `${record.metadata.georeference.source} (adjusted)` : "manually adjusted",
       },
     }
 
@@ -238,14 +238,14 @@ export default function GoogleMapComponent({
                       <div className="flex items-center">
                         <MapPin className="h-4 w-4 mr-1 text-gray-500" />
                         <span className="text-sm font-medium">
-                          {record.georeference.lat.toFixed(4)}, {record.georeference.lon.toFixed(4)}
+                          {record.metadata.georeference.lat.toFixed(4)}, {record.metadata.georeference.lon.toFixed(4)}
                         </span>
                       </div>
-                      {record.georeference.source && (
-                        <p className="text-xs text-gray-500 mt-1">Source: {record.georeference.source}</p>
+                      {record.metadata.georeference.source && (
+                        <p className="text-xs text-gray-500 mt-1">Source: {record.metadata.georeference.source}</p>
                       )}
-                      {record.georeference.intersection && (
-                        <p className="text-xs text-gray-500 mt-1">Intersection: {record.georeference.intersection}</p>
+                      {record.metadata.georeference.intersection && (
+                        <p className="text-xs text-gray-500 mt-1">Intersection: {record.metadata.georeference.intersection}</p>
                       )}
                       {record.text_blob_summary && (
                         <p className="text-xs mt-2 line-clamp-2">{record.text_blob_summary}</p>
@@ -305,8 +305,8 @@ export default function GoogleMapComponent({
             <Marker
               key={recordId}
               position={{
-                lat: record.georeference.lat,
-                lng: record.georeference.lon,
+                lat: record.metadata.georeference.lat,
+                lng: record.metadata.georeference.lon,
               }}
               onClick={() => handleMarkerClick(record, index)}
               icon={createMarkerIcon(isSelected)}
