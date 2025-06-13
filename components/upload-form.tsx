@@ -473,16 +473,10 @@ export function UploadForm() {
           // TODO: BRING BACK WHEN API IS WORKING AGAIN
             // const data = await response.json();
 
-
             const data = stubbedData;
             console.log("✅ JSON Response:", data);
             console.log(data);
             recordsToAdd = data;
-
-
-
-
-
 
             // TODO: BRING BACK WHEN API IS WORKING AGAIN
             // recordsToAdd = [data[0].metadata];
@@ -519,6 +513,7 @@ export function UploadForm() {
           setLoading(false);
         }
         setResponseData(recordsToAdd);
+
       // Navigate to records page
       router.push("/records")
     } catch (error) {
