@@ -36,7 +36,7 @@ export function RecordsMap({ records, selectedRecord, onSelectRecord, onRecordUp
   // Filter records with valid georeference data
   const validRecords = records.filter(
     (record) =>
-      record.metadata.georeference && typeof record.metadata.georeference.lat === "number" && typeof record.metadata.georeference.lon === "number",
+      record?.metadata?.georeference && typeof record?.metadata?.georeference.lat === "number" && typeof record?.metadata?.georeference.lon === "number",
   )
 
   return (

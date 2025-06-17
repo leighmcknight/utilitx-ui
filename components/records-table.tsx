@@ -28,6 +28,11 @@ type SortField = "lat" | "lon" | "conf" | "source" | "trust_score" | "fallback_u
 type SortDirection = "asc" | "desc"
 
 export function RecordsTable({ records, selectedRecord, onSelectRecord }: RecordsTableProps) {
+
+  console.log("records: ", records)
+  console.log("selectedRecord: ", selectedRecord)
+  console.log("onSelectRecord: ", onSelectRecord)
+
   const [sortField, setSortField] = useState<SortField>("lat")
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
   const [detailRecord, setDetailRecord] = useState<AssetRecord | null>(null)
@@ -45,27 +50,29 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
   const sortedRecords = [...records].sort((a, b) => {
     let comparison = 0
 
+    // latitude
+    // longitude
     // Ensure metadata.georeference exists before accessing properties
-    if (!a.metadata.georeference || !b.metadata.georeference) return 0
+    if (!a?.metadata?.georeference || !b?.metadata?.georeference) return 0
 
     switch (sortField) {
       case "lat":
-        comparison = a.metadata.georeference.lat - b.metadata.georeference.lat
+        comparison = a?.metadata?.georeference.lat - b?.metadata?.georeference.lat
         break
       case "lon":
-        comparison = a.metadata.georeference.lon - b.metadata.georeference.lon
+        comparison = a?.metadata?.georeference.lon - b?.metadata?.georeference.lon
         break
       case "conf":
-        comparison = a.metadata.georeference.conf - b.metadata.georeference.conf
+        comparison = a?.metadata?.georeference.conf - b?.metadata?.georeference.conf
         break
       case "source":
-        comparison = (a.metadata.georeference.source || "").localeCompare(b.metadata.georeference.source || "")
+        comparison = (a?.metadata?.georeference.source || "").localeCompare(b?.metadata?.georeference.source || "")
         break
       case "trust_score":
-        comparison = a.metadata.georeference.trust_score - b.metadata.georeference.trust_score
+        comparison = a?.metadata?.georeference.trust_score - b?.metadata?.georeference.trust_score
         break
       case "fallback_used":
-        comparison = (a.metdata.metadata.georeference.fallback_used ? 1 : 0) - (b.metdata.georeference.fallback_used ? 1 : 0)
+        comparison = (a?.metadata?.georeference.fallback_used ? 1 : 0) - (b?.metadata?.georeference.fallback_used ? 1 : 0)
         break
     }
     return sortDirection === "asc" ? comparison : -comparison
@@ -99,8 +106,8 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
 
   // Function to get a unique ID for each record (since the new schema doesn't have an ID field)
   const getRecordId = (record: AssetRecord, index: number) => {
-    if (!record.metadata.georeference) return `record-${index}`
-    return `${record.metadata.georeference.lat}-${record.metadata.georeference.lon}-${index}`
+    if (!record?.metadata?.georeference) return `record-${index}`
+    return `${record?.metadata?.georeference.lat}-${record?.metadata?.georeference.lon}-${index}`
   }
 
   // Function to truncate text
@@ -168,21 +175,21 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                 sortedRecords.map((record, index) => {
                   // Skip records without metadata.georeference data
                   const recordId = getRecordId(record, index)
-                  if (!record.metadata.georeference) return null
+                  console.log("recordId: ", recordId)
+                  console.log("record.metadata.georeference: ", record.metadata.georeference)
+                  if (!record?.metadata?.georeference) return null
 
                   // TODO: REMOVE THIS LOGGING
-                  // console.log("recordId: ", recordId)
-                  // console.log("record.metadata.georeference: ", record.metadata.georeference)
-                  // console.log("!record.metadata.georeference: ", !record.metadata.georeference)
-                  // console.log("selectedRecord === recordId: ", selectedRecord === recordId)
-                  // console.log("starting return")
-                  // console.log("record: ", record)
-                  // console.log("record.metadata.georeference.lat: ", record.metadata.georeference.lat)
-                  // console.log("record.metadata.georeference.lon: ", record.metadata.georeference.lon)
-                  // console.log("record.metadata.georeference.conf: ", record.metadata.georeference.conf)
-                  // console.log("record.metadata.georeference.source: ", record.metadata.georeference.source)
+                  console.log("!record.metadata.georeference: ", !record.metadata.georeference)
+                  console.log("selectedRecord === recordId: ", selectedRecord === recordId)
+                  console.log("starting return")
+                  console.log("record: ", record)
+                  console.log("record.metadata.georeference.lat: ", record.metadata.georeference.lat)
+                  console.log("record.metadata.georeference.lon: ", record.metadata.georeference.lon)
+                  console.log("record.metadata.georeference.conf: ", record.metadata.georeference.conf)
+                  console.log("record.metadata.georeference.source: ", record.metadata.georeference.source)
                   // console.log("record.metadata.georeference.intersection: ", record.metadata.georeference.intersection.length)
-                  // console.log("record.metadata.georeference.intersection: ", detailRecord)
+                  console.log("record.metadata.georeference.intersection: ", detailRecord)
 
                   // record.metadata.georeference.intersection
 
@@ -194,28 +201,31 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                       className={`cursor-pointer ${selectedRecord === recordId ? "bg-muted/50" : ""}`}
                       onClick={() => onSelectRecord(recordId)}
                     >
-                      <TableCell>{record.metadata.georeference.lat.toFixed(6)}</TableCell>
-                      <TableCell>{record.metadata.georeference.lon.toFixed(6)}</TableCell>
+                      {/* .toFixed(6)
+                      .toFixed(6) */}
+                      <TableCell>{record?.metadata?.georeference.lat|| "N/A"}</TableCell>
+                      <TableCell>{record?.metadata?.georeference.lon|| "N/A"}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={getScoreColor(Math.round(record.metadata.georeference.conf * 100))}>
-                          {(record.metadata.georeference.conf * 100).toFixed(0)}%
+                        <Badge variant="outline" className={getScoreColor(Math.round(record?.metadata?.georeference.conf * 100))}>
+                          {(record?.metadata?.georeference.conf * 100).toFixed(0)}%
                         </Badge>
                       </TableCell>
-                      <TableCell>{record.metadata.georeference.source || "N/A"}</TableCell>
+                      <TableCell>{record?.metadata?.georeference.source || "N/A"}</TableCell>
                       <TableCell>
-                        {Array.isArray(record.metadata.georeference.intersection)
-                        ? record.metadata.georeference.intersection.map(item => item.name).join(", ")
-                        : record.metadata.georeference.intersection || "N/A"}
+                        {/* {record?.metadata?.georeference.intersection|| "N/A"} */}
+                        {Array.isArray(record?.metadata?.georeference.intersection)
+                        ? record?.metadata?.georeference.intersection.map((item: any) => item.name).join(", ")
+                        : record?.metadata?.georeference.intersection || "N/A"}
                       </TableCell>
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={getScoreColor(Math.round(record.metadata.georeference.trust_score * 100))}
+                          className={getScoreColor(Math.round(record?.metadata?.georeference.trust_score * 100))}
                         >
-                          {(record.metadata.georeference.trust_score * 100).toFixed(0)}%
+                          {(record?.metadata?.georeference.trust_score * 100).toFixed(0)}%
                         </Badge>
                       </TableCell>
-                      <TableCell>{record.metadata.georeference.fallback_used ? "Yes" : "No"}</TableCell>
+                      <TableCell>{record?.metadata?.georeference.fallback_used ? "Yes" : "No"}</TableCell>
                       <TableCell className="max-w-xs">
                         <div className="truncate">{truncateText(record.text_blob_summary, 50)}</div>
                       </TableCell>
@@ -231,47 +241,47 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                             <DialogHeader>
                               <DialogTitle>Asset Details</DialogTitle>
                             </DialogHeader>
-                            {detailRecord && detailRecord.metadata.georeference && (
+                            {detailRecord && detailRecord?.metadata?.georeference && (
                               <div className="space-y-4">
                                 <div>
                                   <h3 className="text-lg font-semibold">metadata.georeference</h3>
                                   <div className="grid grid-cols-2 gap-2 mt-2">
                                     <div>
                                       <p className="text-sm font-medium">Latitude</p>
-                                      <p className="text-sm">{detailRecord.metadata.georeference.lat.toFixed(6)}</p>
+                                      <p className="text-sm">{detailRecord?.metadata?.georeference.lat.toFixed(6)}</p>
                                     </div>
                                     <div>
                                       <p className="text-sm font-medium">Longitude</p>
-                                      <p className="text-sm">{detailRecord.metadata.georeference.lon.toFixed(6)}</p>
+                                      <p className="text-sm">{detailRecord?.metadata?.georeference.lon.toFixed(6)}</p>
                                     </div>
                                     <div>
                                       <p className="text-sm font-medium">Confidence</p>
                                       <p className="text-sm">
-                                        {(detailRecord.metadata.georeference.conf * 100).toFixed(0) + "%"}
+                                        {(detailRecord?.metadata?.georeference.conf * 100).toFixed(0) + "%"}
                                       </p>
                                     </div>
                                     <div>
                                       <p className="text-sm font-medium">Source</p>
-                                      <p className="text-sm">{detailRecord.metadata.georeference.source || "N/A"}</p>
+                                      <p className="text-sm">{detailRecord?.metadata?.georeference.source || "N/A"}</p>
                                     </div>
                                     <div>
                                       <p className="text-sm font-medium">Intersection</p>
-                                      <p className="text-sm">{detailRecord.metadata.georeference.intersection || "N/A"}</p>
+                                      <p className="text-sm">{detailRecord?.metadata?.georeference.intersection || "N/A"}</p>
                                     </div>
                                     <div>
                                       <p className="text-sm font-medium">Address</p>
-                                      <p className="text-sm">{detailRecord.metadata.georeference.address || "N/A"}</p>
+                                      <p className="text-sm">{detailRecord?.metadata?.georeference.address || "N/A"}</p>
                                     </div>
                                     <div>
                                       <p className="text-sm font-medium">Trust Score</p>
                                       <p className="text-sm">
-                                        {(detailRecord.metadata.georeference.trust_score * 100).toFixed(0) + "%"}
+                                        {(detailRecord?.metadata?.georeference.trust_score * 100).toFixed(0) + "%"}
                                       </p>
                                     </div>
                                     <div>
                                       <p className="text-sm font-medium">Fallback Used</p>
                                       <p className="text-sm">
-                                        {detailRecord.metadata.georeference.fallback_used ? "Yes" : "No"}
+                                        {detailRecord?.metadata?.georeference.fallback_used ? "Yes" : "No"}
                                       </p>
                                     </div>
                                   </div>
