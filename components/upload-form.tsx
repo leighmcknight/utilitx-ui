@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -26,13 +26,12 @@ export function UploadForm() {
   const { addRecords, setRecords } = useAppStore()
   const { records } = useAppStore()
 
-  const [results, setResults] = useState([])
+  const [results, setResults] = useState<any[]>([]);
   const [regionName, setRegionName] = useState("")
   const [boundingBox, setBoundingBox] = useState("")
 
-  const [activeMarkers, setActiveMarkers] = useState([])
-  const mapRef = useRef(null)
-
+  const [activeMarkers, setActiveMarkers]  = useState<any[]>([]);
+  const mapRef = useRef<HTMLDivElement | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -433,110 +432,117 @@ export function UploadForm() {
     }
   }
 
+  // const handleSubmitReal = async () => {
+  //   setIsUploading(true)
+  //   setValidationError(null)
+  //   setLoading(true);
+  //   setError(null);
+  //   setResponseData(null);
+
+  //   // try {
+  //     let recordsToAdd: AssetRecord[] = [];
+  //     const form = new FormData();
+  //     form.append("region", regionName);
+  //     form.append("bbox", JSON.stringify(boundingBox));
+  //     Array.from(files).forEach((file) => form.append("files", file));
+  
+  //     console.log("form: ", form)
+
+  //     try {
+  //       const response = await fetch("https://infra-mvp-api-195923635623.northamerica-northeast2.run.app/process", {
+  //         method: "POST",
+  //         body: form,
+  //       });
+      
+  //       console.log("Response:", response);
+  //       const contentType = response.headers.get("content-type");
+  //       console.log("Content-Type:", contentType);
+        
+  //       if (contentType?.includes("application/json")) {
+  //         const data = await response.json();
+  //         console.log("✅ JSON Response:", data);
+  //         recordsToAdd = data;
+  //       } else {
+  //         const text = await response.text();
+  //         console.warn("📄 Text Response:", text);
+  //         setError("Received non-JSON response from server");
+  //       }
+
+  //         setLoading(false);
+  //         useEffect(() => {
+  //           sessionStorage.setItem("records", JSON.stringify(recordsToAdd));
+  //           router.push("/records");
+  //         }, [records]);
+  //       } catch (err: any) {
+  //         console.error("🚨 Fetch error:", err);
+  //         setError(err.message || "Unknown error");
+  //       } finally {
+  //         setRecords(recordsToAdd)
+  //         console.log("Records to add:", recordsToAdd)
+  //         setLoading(false);
+  //         setIsUploading(false)
+  //       }
+  //     // }
+  //     // catch (error) {
+  //     //   toast({
+  //     //     title: "Upload failed",
+  //     //     description: "There was an error uploading your data. Please try again.",
+  //     //     variant: "destructive",
+  //     //   })
+  //     //   console.error(error)
+  //     // }
+  //     // finally {
+  //     //   setIsUploading(false)
+  //     // }
+  // };
+
   const handleSubmitReal = async () => {
-    setIsUploading(true)
-    setValidationError(null)
+    setIsUploading(true);
+    setValidationError(null);
     setLoading(true);
     setError(null);
     setResponseData(null);
-
-    try {
-      let recordsToAdd: AssetRecord[] = [];
-      const form = new FormData();
-      form.append("region", regionName);
-      form.append("bbox", JSON.stringify(boundingBox));
-      Array.from(files).forEach((file) => form.append("files", file));
   
-      console.log("form: ", form)
-        
-        toast({
-          title: "Upload successful",
-          description: `${files.length} asset records have been uploaded.`,
-        })
-        
-        try {
-          // TODO: BRING BACK WHEN API IS WORKING AGAIN
-          // const response = await fetch("https://infra-mvp-api-195923635623.northamerica-northeast2.run.app/process", {
-          //   method: "POST",
-          //   body: form,
-          // });
-                    
-          // console.log("Response:", response);
-          // TODO: BRING BACK WHEN API IS WORKING AGAIN
-          // const contentType = response.headers.get("content-type");
-          
-          // TODO: BRING BACK WHEN API IS WORKING AGAIN
-          // console.log("response: ", response.body);
-
-          // TODO: BRING BACK WHEN API IS WORKING AGAIN
-          // if (contentType?.includes("application/json")) {
-          // TODO: BRING BACK WHEN API IS WORKING AGAIN
-            // const data = await response.json();
-
-
-            const data = stubbedData;
-            console.log("✅ JSON Response:", data);
-            console.log(data);
-            recordsToAdd = data;
-
-
-
-
-
-
-            // TODO: BRING BACK WHEN API IS WORKING AGAIN
-            // recordsToAdd = [data[0].metadata];
-            
-
-            // setResponseData(recordsToAdd);
-            // data.map((record: any) => {
-              //   recordsToAdd = [...recordsToAdd, ...record];
-              //   setResponseData(recordsToAdd);
-              //   console.log("Record IN UPLOAD FORM:", record);
-              // })
-              // setRecords((prev: any) => [...prev, ...record])
-              // setResponseData((prev: any) => [...prev, ...record]);
-              // for (const record of data) {
-                // if (!validateRecord(record.metadata)) {
-                  //   console.warn("Invalid record:", record);
-                  //   continue; // Skip invalid records
-                  // }
-                  // }
-                  // for (const record of)
-                  
-          // TODO: BRING BACK WHEN API IS WORKING AGAIN
-          //       } else {
-          //         const text = await response.text();
-          //         console.warn("📄 Text Response:", text);
-          //         setError("Received non-JSON response from server");
-          // }
-        } catch (err: any) {
-          console.error("🚨 Fetch error:", err);
-          setError(err.message || "Unknown error");
-        } finally {
-          setRecords(recordsToAdd)
-          console.log("Records to add:", records)
-          setLoading(false);
-        }
-        setResponseData(recordsToAdd);
-      // Navigate to records page
-      router.push("/records")
-    } catch (error) {
-      toast({
-        title: "Upload failed",
-        description: "There was an error uploading your data. Please try again.",
-        variant: "destructive",
-      })
-      console.error(error)
+    let recordsToAdd: AssetRecord[] = [];
+  
+    const form = new FormData();
+    form.append("region", regionName);
+    form.append("bbox", JSON.stringify(boundingBox));
+    Array.from(files).forEach((file) => form.append("files", file));
+  
+    console.log("form: ", form);
+  
+    try {
+      const response = await fetch("https://infra-mvp-api-195923635623.northamerica-northeast2.run.app/process", {
+        method: "POST",
+        body: form,
+      });
+  
+      console.log("Response:", response);
+      const contentType = response.headers.get("content-type");
+      console.log("Content-Type:", contentType);
+  
+      if (contentType?.includes("application/json")) {
+        const data = await response.json();
+        console.log("✅ JSON Response:", data);
+        recordsToAdd = data;
+      } else {
+        const text = await response.text();
+        console.warn("📄 Text Response:", text);
+        setError("Received non-JSON response from server");
+      }
+  
+      sessionStorage.setItem("records", JSON.stringify(recordsToAdd)); // ✅ no hook needed here
+      router.push("/records"); // ✅ safely navigate after storing
+    } catch (err: any) {
+      console.error("🚨 Fetch error:", err);
+      setError(err.message || "Unknown error");
     } finally {
-      setIsUploading(false)
+      setRecords(recordsToAdd);
+      console.log("Records to add:", recordsToAdd);
+      setLoading(false);
+      setIsUploading(false);
     }
-
-    // const form = new FormData();
-    // form.append("region", "Durham Region, ON");
-    // bbox.forEach((val) => "[-79.327997, 43.520000, -78.327997, 44.510000]");
-    // Array.from(files).forEach((file) => form.append("files", file));
-
   };
 
   return (
