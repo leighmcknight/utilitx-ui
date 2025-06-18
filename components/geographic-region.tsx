@@ -61,9 +61,6 @@ export function GeographicRegion({ onRegionSelected, markers = [] }: GeographicR
           setBoundingBox(newBoundingBox)
           onRegionSelected(regionName, newBoundingBox)
           setLoading(false)
-
-          console.log("regionName (in geographic): ", regionName);
-          console.log("boundingBox (in geographic): ", boundingBox);
         } else {
           setError(`Could not find region: ${status}`)
           setLoading(false)

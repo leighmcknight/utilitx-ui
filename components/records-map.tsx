@@ -26,13 +26,6 @@ interface RecordsMapProps {
 export function RecordsMap({ records, selectedRecord, onSelectRecord, onRecordUpdate, getRecordId }: RecordsMapProps) {
   const { toast } = useToast()
   const isMobile = useMobile()
-
-  console.log("records: ", records)
-  console.log("selectedRecord: ", selectedRecord)
-  console.log("onSelectRecord: ", onSelectRecord)
-  console.log("onRecordUpdate: ", onRecordUpdate)
-  console.log("getRecordId: ", getRecordId)
-
   // Filter records with valid georeference data
   const validRecords = records.filter(
     (record) =>

@@ -28,11 +28,6 @@ type SortField = "lat" | "lon" | "conf" | "source" | "trust_score" | "fallback_u
 type SortDirection = "asc" | "desc"
 
 export function RecordsTable({ records, selectedRecord, onSelectRecord }: RecordsTableProps) {
-
-  console.log("records: ", records)
-  console.log("selectedRecord: ", selectedRecord)
-  console.log("onSelectRecord: ", onSelectRecord)
-
   const [sortField, setSortField] = useState<SortField>("lat")
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
   const [detailRecord, setDetailRecord] = useState<AssetRecord | null>(null)
@@ -175,36 +170,16 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                 sortedRecords.map((record, index) => {
                   // Skip records without metadata.georeference data
                   const recordId = getRecordId(record, index)
-                  console.log("recordId: ", recordId)
-                  console.log("record.metadata.georeference: ", record.metadata.georeference)
                   if (!record?.metadata?.georeference) return null
 
-                  // TODO: REMOVE THIS LOGGING
-                  console.log("!record.metadata.georeference: ", !record.metadata.georeference)
-                  console.log("selectedRecord === recordId: ", selectedRecord === recordId)
-                  console.log("starting return")
-                  console.log("record: ", record)
-                  console.log("record.metadata.georeference.lat: ", record.metadata.georeference.lat)
-                  console.log("record.metadata.georeference.lon: ", record.metadata.georeference.lon)
-                  console.log("record.metadata.georeference.conf: ", record.metadata.georeference.conf)
-                  console.log("record.metadata.georeference.source: ", record.metadata.georeference.source)
-                  // console.log("record.metadata.georeference.intersection: ", record.metadata.georeference.intersection.length)
-                  console.log("record.metadata.georeference.intersection: ", detailRecord)
-
-                  // record.metadata.georeference.intersection
-
-
                   return (
-                    // <div></div>
                     <TableRow
                       key={recordId}
                       className={`cursor-pointer ${selectedRecord === recordId ? "bg-muted/50" : ""}`}
                       onClick={() => onSelectRecord(recordId)}
                     >
-                      {/* .toFixed(6)
-                      .toFixed(6) */}
-                      <TableCell>{record?.metadata?.georeference.lat|| "N/A"}</TableCell>
-                      <TableCell>{record?.metadata?.georeference.lon|| "N/A"}</TableCell>
+                      <TableCell>{record?.metadata?.georeference.lat.toFixed(6)|| "N/A"}</TableCell>
+                      <TableCell>{record?.metadata?.georeference.lon.toFixed(6)|| "N/A"}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={getScoreColor(Math.round(record?.metadata?.georeference.conf * 100))}>
                           {(record?.metadata?.georeference.conf * 100).toFixed(0)}%

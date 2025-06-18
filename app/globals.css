@@ -84,6 +84,10 @@ body {
   }
 }
 
+.bg-primary-200{
+  background-color: rgb(12 65 96 / var(--tw-bg-opacity, 1));
+}
+
 @layer base {
   * {
     @apply border-border;

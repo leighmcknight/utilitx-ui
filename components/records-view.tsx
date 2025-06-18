@@ -34,77 +34,48 @@ export function RecordsView() {
 
   const [ingestedData, setIngestedData] = useState(null)
 
-
-  // Initialize working records from store records
-  // useEffect(() => {
-  //   setWorkingRecords(records)
-  //   setHasModifiedRecords(false)
-  // }, [records])
-
-
-  // const responseData = useAppStore((state) => state.responseData);
-
   useEffect(() => {
     const stored = sessionStorage.getItem("records");
     if (stored) {
-      console.log(stored);
       try{
         setIngestedData(JSON.parse(stored));
         setWorkingRecords(JSON.parse(stored));
       } catch(e){
         console.error("Error parsing stored records:", e);
       }
-      // const parsedRecords = JSON.parse(stored);
     }
   }, []);
 
 
   // Use uploaded records
   const displayRecords = workingRecords.length > 0 ? workingRecords : []
-  console.log("displayRecords: ", displayRecords)
   const isEmpty = displayRecords.length === 0
-  console.log("isEmpty: ", isEmpty)
   
   // Get unique sources for filters
   const sources = Array.from(new Set(displayRecords.map((record: any) => record?.metadata?.georeference?.source).filter(Boolean)))
-  console.log("sources: ", sources)
 
   const filteredRecords = displayRecords.filter((record) => {
     record.text_blob_summary = record.text_blob_summary || "Summary of utility drawing..."
-    console.log("record.text_blob_summary: ", record.text_blob_summary);
     
     // Ensure all properties exist before accessing them
     if (!record.text_blob_summary || !record?.metadata?.georeference) return false
     
     // Text search in summary or intersection
     const summaryMatch = record.text_blob_summary.toLowerCase().includes(searchQuery.toLowerCase())
-    console.log("summaryMatch: ", summaryMatch);
 
     const intersectionMatch = record?.metadata?.georeference.intersection &&
     record?.metadata?.georeference.intersection.toString().toLowerCase().includes(searchQuery.toLowerCase())
 
-    console.log("intersectionMatch: ", intersectionMatch);
-
     const addressMatch = record?.metadata?.georeference.address && record?.metadata?.georeference.address.toLowerCase().includes(searchQuery.toLowerCase());  
 
-    console.log("addressMatch: ", addressMatch);
-
     const matchesSearch = searchQuery === "" || summaryMatch || intersectionMatch || addressMatch;
-    
-    console.log("matchesSearch: ", matchesSearch);
-
 
     // Source filter
     const matchesSource = sourceFilter.length === 0 || (record?.metadata?.georeference.source && sourceFilter.includes(record?.metadata?.georeference.source))
 
-    console.log("matchesSource: ", matchesSource);
   
     return matchesSearch && matchesSource
   });
-
-  console.log("filteredRecords: ", filteredRecords);
-  console.log("selectedRecord: ", selectedRecord);
-  // console.log("handleRecordSelect: ", handleRecordSelect);
 
   const handleRecordSelect = (id: string) => {
     setSelectedRecord(id === selectedRecord ? null : id)
@@ -124,19 +95,14 @@ export function RecordsView() {
 
   // Function to get a unique ID for each record
   const getRecordId = (record: AssetRecord, index: number) => {
-    // TODO: REMOVE THIS LOGGING
-    console.log("record.metadata.georeference: ", record.metadata.georeference)
     if (!record?.metadata?.georeference) return `record-${index}`
     return `${record?.metadata?.georeference.lat}-${record?.metadata?.georeference.lon}-${index}`
   }
   
   // Calculate stats
   const totalRecords = displayRecords.length
-  // TODO: REMOVE THIS LOGGING
-  console.log("totalRecords: ", totalRecords)
   const lowConfidenceCount = displayRecords.filter((r) => r?.metadata?.georeference?.conf < 0.7).length
-  // TODO: REMOVE THIS LOGGING
-  console.log("lowConfidenceCount: ", lowConfidenceCount)
+
   const avgTrustScore =
     displayRecords.length > 0
     ? Math.round(
@@ -144,8 +110,6 @@ export function RecordsView() {
       100,
     )
     : 0
-    // TODO: REMOVE THIS LOGGING
-  console.log("avgTrustScore: ", avgTrustScore)
 
   if (isEmpty) {
     return (
