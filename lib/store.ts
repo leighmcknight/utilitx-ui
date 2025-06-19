@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 
 export const useDataStore = create((set) => ({
 	responseData: null,
-	setResponseData: (data) => set({ responseData: data }),
+	setResponseData: (data: any) => set({ responseData: data }),
 }));
 
 // Define the new data structure based on the provided JSON
@@ -41,7 +41,6 @@ export interface AssetRecord {
 	georeference: Georeference;
 	bounding_box: BoundingBox;
 	bbox_for_prompt?: string;
-	text_blob_summary?: string;
 	metadata: {
 		tiles: { [key: string]: { text_blob: string } };
 		georeference: Georeference;
