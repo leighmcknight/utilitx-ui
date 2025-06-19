@@ -88,6 +88,115 @@ body {
   background-color: rgb(12 65 96 / var(--tw-bg-opacity, 1));
 }
 
+.red-dot{
+  background-color: rgb(237 28 36 / var(--tw-bg-opacity, 1));
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.small-red-dot{
+  background-color: rgb(237 28 36 / var(--tw-bg-opacity, 1));
+  border: 1px solid rgb(0 0 0 / var(--tw-bg-opacity, 1));
+  max-width: 15px;
+  max-height: 15px;
+}
+
+.yellow-dot{
+  background-color: rgb(255 255 0 / var(--tw-bg-opacity, 1));
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.small-yellow-dot{
+  background-color: rgb(255 255 0 / var(--tw-bg-opacity, 1));
+  border: 1px solid rgb(0 0 0 / var(--tw-bg-opacity, 1));
+  max-width: 15px;
+  max-height: 15px;
+}
+
+.orange-dot{
+  background-color: rgb(247 147 30 / var(--tw-bg-opacity, 1));
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.small-orange-dot{
+  background-color: rgb(247 147 30 / var(--tw-bg-opacity, 1));
+  border: 1px solid rgb(0 0 0 / var(--tw-bg-opacity, 1));
+  max-width: 15px;
+  max-height: 15px;
+}
+
+.blue-dot{
+  background-color: rgb(0 0 255 / var(--tw-bg-opacity, 1));
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.small-blue-dot{
+  background-color: rgb(0 0 255 / var(--tw-bg-opacity, 1));
+  border: 1px solid rgb(0 0 0 / var(--tw-bg-opacity, 1));
+  max-width: 15px;
+  max-height: 15px;
+}
+
+.purple-dot{
+  background-color: rgb(102 45 145 / var(--tw-bg-opacity, 1));
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.small-purple-dot{
+  background-color: rgb(102 45 145 / var(--tw-bg-opacity, 1));
+  border: 1px solid rgb(0 0 0 / var(--tw-bg-opacity, 1));
+  max-width: 15px;
+  max-height: 15px;
+}
+
+.green-dot{
+  background-color: rgb(57 181 74 / var(--tw-bg-opacity, 1));
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.small-green-dot{
+  background-color: rgb(57 181 74 / var(--tw-bg-opacity, 1));
+  border: 1px solid rgb(0 0 0 / var(--tw-bg-opacity, 1));
+  max-width: 15px;
+  max-height: 15px;
+}
+
+.pink-dot{
+  background-color: rgb(237 30 121 / var(--tw-bg-opacity, 1));
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.small-pink-dot{
+  background-color: rgb(237 30 121 / var(--tw-bg-opacity, 1));
+  border: 1px solid rgb(0 0 0 / var(--tw-bg-opacity, 1));
+  max-width: 15px;
+  max-height: 15px;
+}
+
+.white-dot{
+  border: 1px solid rgb(0 0 0 / var(--tw-bg-opacity, 1));
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.small-white-dot{
+  border: 1px solid rgb(0 0 0 / var(--tw-bg-opacity, 1));
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+  max-width: 15px;
+  max-height: 15px;
+}
+
+.record-count{
+  align-content: center;
+}
+
 @layer base {
   * {
     @apply border-border;

@@ -45,8 +45,6 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
   const sortedRecords = [...records].sort((a, b) => {
     let comparison = 0
 
-    // latitude
-    // longitude
     // Ensure metadata.georeference exists before accessing properties
     if (!a?.metadata?.georeference || !b?.metadata?.georeference) return 0
 
@@ -189,7 +187,7 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                       <TableCell>
                         {/* {record?.metadata?.georeference.intersection|| "N/A"} */}
                         {Array.isArray(record?.metadata?.georeference.intersection)
-                        ? record?.metadata?.georeference.intersection.map((item: any) => item.name).join(", ")
+                        ? record?.metadata?.georeference.intersection.map((item: any) => item).join(", ")
                         : record?.metadata?.georeference.intersection || "N/A"}
                       </TableCell>
                       <TableCell>

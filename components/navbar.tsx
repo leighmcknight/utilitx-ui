@@ -20,7 +20,7 @@ export default function Navbar() {
             Upload
           </Link>
           <Link href="/records" className="text-sm font-medium transition-colors hover:text-primary">
-            Records
+            Visualize
           </Link>
         </nav>
         <ThemeToggle />

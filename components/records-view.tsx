@@ -180,8 +180,8 @@ export function RecordsView() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="record-count">
           <CardContent className="p-6 flex flex-col items-center">
             <div className="text-4xl font-bold">{totalRecords}</div>
             <div className="text-sm text-gray-500">Total Records</div>
@@ -189,14 +189,48 @@ export function RecordsView() {
         </Card>
         <Card>
           <CardContent className="p-6 flex flex-col items-center">
-            <div className="text-4xl font-bold">{lowConfidenceCount}</div>
-            <div className="text-sm text-gray-500">Low Confidence</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6 flex flex-col items-center">
-            <div className="text-4xl font-bold">{avgTrustScore}%</div>
-            <div className="text-sm text-gray-500">Trust Score (Avg)</div>
+            <div className="md:grid-cols-3 grid content-start gap-2">
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full red-dot mr-2">
+                </div>
+                <p className="text-sm">Electric Power Lines, Cables, Conduit and Lighting Cables</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full yellow-dot mr-2">
+                </div>
+                <p className="text-sm">Gas, Oil, Steam, Petroleum or Gaseous Materials</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full orange-dot mr-2">
+                </div>
+                <p className="text-sm">Communications, Alarm or Signal Lines, Cables or Conduit</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full blue-dot mr-2">
+                </div>
+                <p className="text-sm">Portable Water</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full purple-dot mr-2">
+                </div>
+                <p className="text-sm">Reclaimed Water, Irrigation and Slurry Lines</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full green-dot mr-2">
+                </div>
+                <p className="text-sm">Sewer and Drain Lines</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full pink-dot mr-2">
+                </div>
+                <p className="text-sm">Temporary Survey Markings</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full white-dot mr-2">
+                </div>
+                <p className="text-sm">Proposed Excavation</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

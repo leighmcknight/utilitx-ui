@@ -13,10 +13,10 @@ import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { Loader2, AlertTriangle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { useAppStore, type AssetRecord } from "@/lib/store"
+import { UploadedWithOption, useAppStore, type AssetRecord } from "@/lib/store"
 
 export function UploadForm() {
-  const [files, setFiles] = useState<File[]>([])
+  const [files, setFiles] = useState<UploadedWithOption[]>([])
   const [jsonData, setJsonData] = useState("")
   const [isUploading, setIsUploading] = useState(false)
   const [activeTab, setActiveTab] = useState("file")
@@ -37,6 +37,8 @@ export function UploadForm() {
   const [error, setError] = useState<string | null>(null);
   const [responseData, setResponseData] = useState<any>(null);
 
+  console.log(setFiles)
+  console.log(files)
   // const validateRecord = (record: any): record is AssetRecord => {
   //   // Check if record is an object
   //   if (!record || typeof record !== "object") {
@@ -223,7 +225,7 @@ export function UploadForm() {
     setBoundingBox(bbox)
   }
 
-  const handleFilesSelected = (selectedFiles: File[]) => {
+  const handleFilesSelected = (selectedFiles: UploadedWithOption[]) => {
     setFiles(selectedFiles)
   }
 
@@ -251,6 +253,7 @@ export function UploadForm() {
   }
 
   const handleSubmitReal = async () => {
+    sessionStorage.clear(); // Clear session storage before upload
     setIsUploading(true);
     setValidationError(null);
     setLoading(true);
@@ -262,7 +265,7 @@ export function UploadForm() {
     const form = new FormData();
     form.append("region", regionName);
     form.append("bbox", JSON.stringify(boundingBox));
-    Array.from(files).forEach((file) => form.append("files", file));
+    Array.from(files).forEach((file) => form.append("files", file.file));
   
     try {
       const response = await fetch("https://infra-mvp-api-195923635623.northamerica-northeast2.run.app/process", {
@@ -283,7 +286,8 @@ export function UploadForm() {
       }
   
       sessionStorage.setItem("records", JSON.stringify(recordsToAdd)); // ✅ no hook needed here
-      router.push("/records"); // ✅ safely navigate after storing
+      console.log(form)
+      // router.push("/records"); // ✅ safely navigate after storing
     } catch (err: any) {
       console.error("🚨 Fetch error:", err);
       setError(err.message || "Unknown error");
