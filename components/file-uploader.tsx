@@ -260,7 +260,7 @@ export function FileUploader({ files, setFiles }: FileUploaderProps) {
                           onClick={(e) => {
                             e.preventDefault()
                             const updatedFiles = [...files]
-                            updatedFiles[index] = { ...updatedFiles[index], type: "Proposed Excavation" }
+                            updatedFiles[index] = { ...updatedFiles[index], option: "Proposed Excavation" }
                             setFiles(updatedFiles)
                             setSelectedOption((prev) => ({ ...prev, [index]: "Proposed Excavation" }))
                             setOpenDropdown(null)
