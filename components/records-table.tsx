@@ -33,6 +33,17 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
   const [detailRecord, setDetailRecord] = useState<AssetRecord | null>(null)
   const { toast } = useToast()
 
+  const optionToDot = {
+    "Electric Power Lines, Cables, Conduit and Lighting Cables": { color: "red-dot", label: "Electric Power Lines, Cables, Conduit and Lighting Cables" },
+    "Gas, Oil, Steam, Petroleum or Gaseous Materials": { color: "yellow-dot", label: "Gas, Oil, Steam, Petroleum or Gaseous Materials" },
+    "Communications, Alarm or Signal Lines, Cables or Conduit": { color: "orange-dot", label: "Communications, Alarm or Signal Lines, Cables or Conduit" },
+    "Portable Water": { color: "blue-dot", label: "Portable Water" },
+    "Reclaimed Water, Irrigation and Slurry Lines": { color: "purple-dot", label: "Reclaimed Water, Irrigation and Slurry Lines" },
+    "Sewer and Drain Lines": { color: "green-dot", label: "Sewer and Drain Lines" },
+    "Temporary Survey Markings": { color: "pink-dot", label: "Temporary Survey Markings" },
+    "Proposed Excavation": { color: "white-dot", label: "Proposed Excavation" },
+  };
+
   const handleSort = (field: SortField) => {
     if (field === sortField) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc")
@@ -108,6 +119,7 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
     if (!text) return "N/A"
     return text.length > maxLength ? text.substring(0, maxLength) + "..." : text
   }
+  
 
   return (
     <>
@@ -116,6 +128,11 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
           <Table>
             <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
+                <TableHead className="cursor-pointer">
+                  <div className="flex items-center">
+                    File Type
+                  </div>
+                </TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort("lat")}>
                   <div className="flex items-center">
                     Latitude
@@ -166,7 +183,6 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                 </TableRow>
               ) : (
                 sortedRecords.map((record, index) => {
-                  // Skip records without metadata.georeference data
                   const recordId = getRecordId(record, index)
                   if (!record?.metadata?.georeference) return null
 
@@ -176,6 +192,20 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                       className={`cursor-pointer ${selectedRecord === recordId ? "bg-muted/50" : ""}`}
                       onClick={() => onSelectRecord(recordId)}
                     >
+                      <TableCell>
+                        {(() => {
+                          const option = record?.selected_option || "N/A";
+
+                          if (option in optionToDot) {
+                            const dot = optionToDot[option as keyof typeof optionToDot];
+                            return (
+                              <div className="flex items-center">
+                                <div className={`w-6 h-6 rounded-full ${dot.color} mr-2`} />
+                              </div>
+                            );
+                          }
+                        })()}
+                      </TableCell>
                       <TableCell>{record?.metadata?.georeference.lat.toFixed(6)|| "N/A"}</TableCell>
                       <TableCell>{record?.metadata?.georeference.lon.toFixed(6)|| "N/A"}</TableCell>
                       <TableCell>

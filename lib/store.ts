@@ -56,6 +56,7 @@ export interface AssetRecord {
 	text_blob_interpretation_labeled?: string;
 	text_blob_summary?: string;
 	error: null | string;
+	selected_option: string;
 }
 
 interface AppState {

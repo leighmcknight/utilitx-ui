@@ -39,179 +39,6 @@ export function UploadForm() {
 
   console.log(setFiles)
   console.log(files)
-  // const validateRecord = (record: any): record is AssetRecord => {
-  //   // Check if record is an object
-  //   if (!record || typeof record !== "object") {
-  //     return false
-  //   }
-
-  //   // Check for tiles
-  //   if (!record.tiles || typeof record.tiles !== "object") {
-  //     return false
-  //   }
-
-  //   // Check for georeference
-  //   if (!record.georeference || typeof record.georeference !== "object") {
-  //     return false
-  //   }
-
-  //   // Check required georeference fields
-  //   const geo = record.georeference
-  //   if (
-  //     typeof geo.lat !== "number" ||
-  //     typeof geo.lon !== "number" ||
-  //     typeof geo.conf !== "number" ||
-  //     typeof geo.source !== "string" ||
-  //     typeof geo.trust_score !== "number" ||
-  //     typeof geo.fallback_used !== "boolean"
-  //   ) {
-  //     return false
-  //   }
-
-  //   // Check for bounding_box
-  //   if (!record.bounding_box || typeof record.bounding_box !== "object") {
-  //     return false
-  //   }
-
-  //   // Check bounding_box structure
-  //   const bbox = record.bounding_box
-  //   if (
-  //     !bbox.southwest ||
-  //     !bbox.northeast ||
-  //     typeof bbox.southwest !== "object" ||
-  //     typeof bbox.northeast !== "object"
-  //   ) {
-  //     return false
-  //   }
-
-  //   // Check bounding_box coordinates
-  //   if (
-  //     typeof bbox.southwest.lat !== "number" ||
-  //     typeof bbox.southwest.lng !== "number" ||
-  //     typeof bbox.northeast.lat !== "number" ||
-  //     typeof bbox.northeast.lng !== "number"
-  //   ) {
-  //     return false
-  //   }
-
-  //   // Check for text_blob_summary
-  //   if (typeof record.text_blob_summary !== "string") {
-  //     return false
-  //   }
-
-  //   return true
-  // }
-
-  // const processJsonData = (jsonString: string): AssetRecord[] | null => {
-  //   try {
-  //     const parsed = JSON.parse(jsonString)
-  //     let records: any[]
-
-  //     console.log("PARSED IN JSON: ", parsed)
-
-  //     // Handle both array and object formats
-  //     if (Array.isArray(parsed)) {
-  //       records = parsed
-  //     } else if (parsed.records && Array.isArray(parsed.records)) {
-  //       records = parsed.records
-  //     } else if (typeof parsed === "object") {
-  //       records = [parsed] // Single record
-  //     } else {
-  //       setValidationError("Invalid JSON format. Expected an array of records or an object with a 'records' array.")
-  //       return null
-  //     }
-
-  //     // Validate each record
-  //     for (let i = 0; i < records.length; i++) {
-  //       if (!validateRecord(records[i])) {
-  //         setValidationError(`Record at index ${i} is missing required fields or has invalid data types.`)
-  //         return null
-  //       }
-  //     }
-
-  //     setValidationError(null)
-  //     return records as AssetRecord[]
-  //   } catch (error) {
-  //     setValidationError("Invalid JSON: " + (error instanceof Error ? error.message : String(error)))
-  //     return null
-  //   }
-  // }
-
-  // const processFileData = async (file: File): Promise<AssetRecord[] | null> => {
-  //   return new Promise((resolve) => {
-  //     const reader = new FileReader()
-  //     reader.onload = (e) => {
-  //       const content = e.target?.result as string
-  //       const records = processJsonData(content)
-  //       resolve(records)
-  //     }
-  //     reader.onerror = () => {
-  //       setValidationError("Error reading file")
-  //       resolve(null)
-  //     }
-  //     reader.readAsText(file)
-  //   })
-  // }
-
-  // const handleSubmit = async () => {
-  //   setIsUploading(true)
-  //   setValidationError(null)
-
-  //   try {
-  //     let recordsToAdd: AssetRecord[] = []
-
-  //     // Process JSON data
-  //     if (activeTab === "json" && jsonData) {
-  //       const records = processJsonData(jsonData)
-  //       if (!records) {
-  //         setIsUploading(false)
-  //         return
-  //       }
-  //       recordsToAdd = records
-  //     }
-
-  //     // Process file uploads
-  //     if (activeTab === "file" && files.length > 0) {
-  //       for (const file of files) {
-  //         if (file.type === "application/json" || file.name.endsWith(".json")) {
-  //           const records = await processFileData(file)
-  //           if (records) {
-  //             recordsToAdd = [...recordsToAdd, ...records]
-  //           } else {
-  //             setIsUploading(false)
-  //             return
-  //           }
-  //         }
-  //       }
-  //     }
-
-  //     if (recordsToAdd.length === 0) {
-  //       setValidationError("No valid records found to upload")
-  //       setIsUploading(false)
-  //       return
-  //     }
-
-  //     // Add records to store
-  //     setRecords(recordsToAdd)
-
-  //     toast({
-  //       title: "Upload successful",
-  //       description: `${recordsToAdd.length} asset records have been uploaded.`,
-  //     })
-
-  //     // Navigate to records page
-  //     router.push("/records")
-  //   } catch (error) {
-  //     toast({
-  //       title: "Upload failed",
-  //       description: "There was an error uploading your data. Please try again.",
-  //       variant: "destructive",
-  //     })
-  //     console.error(error)
-  //   } finally {
-  //     setIsUploading(false)
-  //   }
-  // }
 
   const isSubmitDisabled = () => {
     if (isUploading) return true
@@ -266,6 +93,8 @@ export function UploadForm() {
     form.append("region", regionName);
     form.append("bbox", JSON.stringify(boundingBox));
     Array.from(files).forEach((file) => form.append("files", file.file));
+
+    sessionStorage.setItem("files", JSON.stringify(files)); // ✅ no hook needed here
   
     try {
       const response = await fetch("https://infra-mvp-api-195923635623.northamerica-northeast2.run.app/process", {
@@ -287,7 +116,7 @@ export function UploadForm() {
   
       sessionStorage.setItem("records", JSON.stringify(recordsToAdd)); // ✅ no hook needed here
       console.log(form)
-      // router.push("/records"); // ✅ safely navigate after storing
+      router.push("/records"); // ✅ safely navigate after storing
     } catch (err: any) {
       console.error("🚨 Fetch error:", err);
       setError(err.message || "Unknown error");

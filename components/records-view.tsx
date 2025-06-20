@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useAppStore, type AssetRecord } from "@/lib/store"
+import { UploadedWithOption, useAppStore, type AssetRecord } from "@/lib/store"
 import { useRouter } from "next/navigation"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
@@ -30,22 +30,43 @@ export function RecordsView() {
   const [view, setView] = useState<"list" | "map">("list")
   const [workingRecords, setWorkingRecords] = useState<AssetRecord[]>([])
   const [hasModifiedRecords, setHasModifiedRecords] = useState(false)
+  
   const { records } = useAppStore()
 
   const [ingestedData, setIngestedData] = useState(null)
 
   useEffect(() => {
     const stored = sessionStorage.getItem("records");
+    let storedFiles = sessionStorage.getItem("files");
     if (stored) {
-      try{
-        setIngestedData(JSON.parse(stored));
-        setWorkingRecords(JSON.parse(stored));
-      } catch(e){
-        console.error("Error parsing stored records:", e);
+      try {
+        const parsedRecords = JSON.parse(stored);
+        const parsedFiles = storedFiles ? JSON.parse(storedFiles) : [];
+      
+        const fileOptionMap = Object.fromEntries(
+          parsedFiles.map(({ file, option }: { file: { path: string }, option: string }) => [
+            file.path.replace(/^\.\/+/, ""),
+            option,
+          ])
+        );
+
+        const enriched = parsedRecords.map((record: any) => {
+          const nameFromRecord = record.record_id?.replace(/-p\d+$/, "");
+          const matchedOption = fileOptionMap[nameFromRecord];
+        
+          return {
+            ...record,
+            selected_option: matchedOption || null,
+          };
+        });
+
+        setIngestedData(enriched);
+        setWorkingRecords(enriched);
+      } catch (e) {
+        console.error("Error parsing session data:", e);
       }
     }
   }, []);
-
 
   // Use uploaded records
   const displayRecords = workingRecords.length > 0 ? workingRecords : []
