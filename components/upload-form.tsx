@@ -6,14 +6,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { GeographicRegion } from "@/components/geographic-region"
 import { ResultsView } from "@/components/results-view"
+import  ProgressBar  from "@/components/progress-bar"
 
 import { FileUploader } from "./file-uploader"
 import { JsonEditor } from "./json-editor"
-import { useToast } from "@/hooks/use-toast"
+// import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { Loader2, AlertTriangle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { UploadedWithOption, useAppStore, type AssetRecord } from "@/lib/store"
+
 
 export function UploadForm() {
   const [files, setFiles] = useState<UploadedWithOption[]>([])
@@ -21,8 +23,8 @@ export function UploadForm() {
   const [isUploading, setIsUploading] = useState(false)
   const [activeTab, setActiveTab] = useState("file")
   const [validationError, setValidationError] = useState<string | null>(null)
-  const { toast } = useToast()
   const router = useRouter()
+  // const { toast } = useToast()
   const { addRecords, setRecords } = useAppStore()
   const { records } = useAppStore()
 
@@ -36,9 +38,6 @@ export function UploadForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [responseData, setResponseData] = useState<any>(null);
-
-  console.log(setFiles)
-  console.log(files)
 
   const isSubmitDisabled = () => {
     if (isUploading) return true
@@ -97,11 +96,11 @@ export function UploadForm() {
     sessionStorage.setItem("files", JSON.stringify(files)); // ✅ no hook needed here
   
     try {
+      setLoading(true)
       const response = await fetch("https://infra-mvp-api-195923635623.northamerica-northeast2.run.app/process", {
         method: "POST",
         body: form,
       });
-  
       const contentType = response.headers.get("content-type");
   
       if (contentType?.includes("application/json")) {
@@ -128,86 +127,61 @@ export function UploadForm() {
   };
 
   return (
-    <Card className="max-w-3xl mx-auto">
-      <CardHeader>
-        <div ref={mapRef}>
-          <GeographicRegion onRegionSelected={handleRegionSelected} markers={activeMarkers} />
-        </div>
+    <div>
+      <ProgressBar loading={loading} />
+      <Card className="max-w-3xl mx-auto">
 
-        <ResultsView results={results} onViewOnMap={handleViewOnMap} />
-      </CardHeader>
-      <CardHeader>
-        <div className="flex items-center mb-4">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-200 text-white mr-2">
-            <span className="text-sm font-bold">2</span>
+        <CardHeader>
+          <div ref={mapRef}>
+            <GeographicRegion onRegionSelected={handleRegionSelected} markers={activeMarkers} />
           </div>
-          <CardTitle>Batch Upload Records</CardTitle>
-        </div>
-        <CardDescription>Upload your infrastructure asset records in bulk using a file or JSON data</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="file" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="file">File Upload</TabsTrigger>
-            <TabsTrigger value="json">JSON Data</TabsTrigger>
-          </TabsList>
-          <TabsContent value="file">
-            <FileUploader files={files} setFiles={setFiles} />
-          </TabsContent>
-          <TabsContent value="json">
-            <JsonEditor value={jsonData} onChange={setJsonData} />
-          </TabsContent>
-        </Tabs>
 
-        {validationError && (
-          <Alert variant="destructive" className="mt-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{validationError}</AlertDescription>
-          </Alert>
-        )}
+          <ResultsView results={results} onViewOnMap={handleViewOnMap} />
+        </CardHeader>
+        <CardHeader>
+          <div className="flex items-center mb-4">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-200 text-white mr-2">
+              <span className="text-sm font-bold">2</span>
+            </div>
+            <CardTitle>Batch Upload Records</CardTitle>
+          </div>
+          <CardDescription>Upload your infrastructure asset records in bulk using a file or JSON data</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="file" className="w-full" onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="file">File Upload</TabsTrigger>
+              <TabsTrigger value="json">JSON Data</TabsTrigger>
+            </TabsList>
+            <TabsContent value="file">
+              <FileUploader files={files} setFiles={setFiles} />
+            </TabsContent>
+            <TabsContent value="json">
+              <JsonEditor value={jsonData} onChange={setJsonData} />
+            </TabsContent>
+          </Tabs>
 
-        <Alert className="mt-4">
-          <AlertDescription>
-            JSON data should follow this format:
-            <pre className="mt-2 p-2 bg-muted rounded-md text-xs overflow-auto">
-              {`[
-                {
-                  "tiles": {
-                    "tile_0_0": { "text_blob": "..." },
-                    "tile_0_1": { "text_blob": "..." }
-                  },
-                  "georeference": {
-                    "lat": 43.896933,
-                    "lon": -78.843889,
-                    "conf": 0.9,
-                    "source": "google_intersection",
-                    "trust_score": 0.9,
-                    "fallback_used": false
-                  },
-                  "bounding_box": {
-                    "southwest": { "lat": 43.52, "lng": -79.32 },
-                    "northeast": { "lat": 44.51, "lng": -78.32 }
-                  },
-                  "text_blob_summary": "Summary of utility drawing..."
-                }
-              ]`}
-            </pre>
-          </AlertDescription>
-        </Alert>
-      </CardContent>
-      <CardFooter>
-        <Button className="w-full" onClick={handleSubmitReal} disabled={isSubmitDisabled()}>
-          {isUploading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Uploading...
-            </>
-          ) : (
-            "Upload Records"
+          {validationError && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{validationError}</AlertDescription>
+            </Alert>
           )}
-        </Button>
-      </CardFooter>
-    </Card>
+        </CardContent>
+        <CardFooter>
+          <Button className="w-full" onClick={handleSubmitReal} disabled={isSubmitDisabled()}>
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              "Upload Records"
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
   )
 }

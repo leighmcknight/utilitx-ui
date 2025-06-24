@@ -210,6 +210,8 @@ export function RecordsView() {
         </Card>
         <Card>
           <CardContent className="p-6 flex flex-col items-center">
+            <p className="text-xl font-bold gap-2">Colour coding is used to display the primary asset as built was submitted for.</p>
+            <hr />
             <div className="md:grid-cols-3 grid content-start gap-2">
               <div className="flex items-center mb-4">
                 <div className="flex items-center justify-center w-8 h-8 rounded-full red-dot mr-2">
@@ -229,7 +231,7 @@ export function RecordsView() {
               <div className="flex items-center mb-4">
                 <div className="flex items-center justify-center w-8 h-8 rounded-full blue-dot mr-2">
                 </div>
-                <p className="text-sm">Portable Water</p>
+                <p className="text-sm">Potable Water</p>
               </div>
               <div className="flex items-center mb-4">
                 <div className="flex items-center justify-center w-8 h-8 rounded-full purple-dot mr-2">

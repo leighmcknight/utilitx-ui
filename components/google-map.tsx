@@ -30,7 +30,7 @@ const optionToDotColor: Record<string, string> = {
   "Electric Power Lines, Cables, Conduit and Lighting Cables": "red",
   "Gas, Oil, Steam, Petroleum or Gaseous Materials": "yellow",
   "Communications, Alarm or Signal Lines, Cables or Conduit": "orange",
-  "Portable Water": "blue",
+  "Potable Water": "blue",
   "Reclaimed Water, Irrigation and Slurry Lines": "purple",
   "Sewer and Drain Lines": "green",
   "Temporary Survey Markings": "pink",

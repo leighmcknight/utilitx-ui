@@ -37,7 +37,7 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
     "Electric Power Lines, Cables, Conduit and Lighting Cables": { color: "red-dot", label: "Electric Power Lines, Cables, Conduit and Lighting Cables" },
     "Gas, Oil, Steam, Petroleum or Gaseous Materials": { color: "yellow-dot", label: "Gas, Oil, Steam, Petroleum or Gaseous Materials" },
     "Communications, Alarm or Signal Lines, Cables or Conduit": { color: "orange-dot", label: "Communications, Alarm or Signal Lines, Cables or Conduit" },
-    "Portable Water": { color: "blue-dot", label: "Portable Water" },
+    "Potable Water": { color: "blue-dot", label: "Potable Water" },
     "Reclaimed Water, Irrigation and Slurry Lines": { color: "purple-dot", label: "Reclaimed Water, Irrigation and Slurry Lines" },
     "Sewer and Drain Lines": { color: "green-dot", label: "Sewer and Drain Lines" },
     "Temporary Survey Markings": { color: "pink-dot", label: "Temporary Survey Markings" },
@@ -215,7 +215,6 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                       </TableCell>
                       <TableCell>{record?.metadata?.georeference.source || "N/A"}</TableCell>
                       <TableCell>
-                        {/* {record?.metadata?.georeference.intersection|| "N/A"} */}
                         {Array.isArray(record?.metadata?.georeference.intersection)
                         ? record?.metadata?.georeference.intersection.map((item: any) => item).join(", ")
                         : record?.metadata?.georeference.intersection || "N/A"}

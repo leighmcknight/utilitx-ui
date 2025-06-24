@@ -184,15 +184,15 @@ export function FileUploader({ files, setFiles }: FileUploaderProps) {
                           onClick={(e) => {
                             e.preventDefault()
                             const updatedFiles = [...files]
-                            updatedFiles[index] = { ...updatedFiles[index], option: "Portable Water" }
+                            updatedFiles[index] = { ...updatedFiles[index], option: "Potable Water" }
                             setFiles(updatedFiles)
-                            setSelectedOption((prev) => ({ ...prev, [index]: "Portable Water" }))
+                            setSelectedOption((prev) => ({ ...prev, [index]: "Potable Water" }))
                             setOpenDropdown(null)
                           }}
                         >
                           <div className="flex items-center justify-center w-8 h-8 rounded-full small-blue-dot mr-2">
                           </div>
-                          <p className="text-sm">Portable Water</p>
+                          <p className="text-sm">Potable Water</p>
                         </a>
                         <a
                           href="#"
