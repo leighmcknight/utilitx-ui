@@ -44,8 +44,8 @@ export function RecordsView() {
         const parsedFiles = storedFiles ? JSON.parse(storedFiles) : [];
       
         const fileOptionMap = Object.fromEntries(
-          parsedFiles.map(({ file, option }: { file: { path: string }, option: string }) => [
-            file.path.replace(/^\.\/+/, ""),
+          parsedFiles.map(({ file, option }: { file: { name: string }, option: string }) => [
+            file?.name.replace(/^\.\/+/, ""),
             option,
           ])
         );

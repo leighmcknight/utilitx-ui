@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { Check, AlertCircle, Upload, FileJson, Download } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface JsonEditorProps {
   value: string
@@ -230,6 +231,34 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
           </CardContent>
         </Card>
       )}
+        <Alert className="mt-4">
+          <AlertDescription>
+            JSON data should follow this format:
+            <pre className="mt-2 p-2 bg-muted rounded-md text-xs overflow-auto">
+              {`[
+                {
+                  "tiles": {
+                    "tile_0_0": { "text_blob": "..." },
+                    "tile_0_1": { "text_blob": "..." }
+                  },
+                  "georeference": {
+                    "lat": 43.896933,
+                    "lon": -78.843889,
+                    "conf": 0.9,
+                    "source": "google_intersection",
+                    "trust_score": 0.9,
+                    "fallback_used": false
+                  },
+                  "bounding_box": {
+                    "southwest": { "lat": 43.52, "lng": -79.32 },
+                    "northeast": { "lat": 44.51, "lng": -78.32 }
+                  },
+                  "text_blob_summary": "Summary of utility drawing..."
+                }
+              ]`}
+            </pre>
+          </AlertDescription>
+        </Alert>
     </div>
   )
 }

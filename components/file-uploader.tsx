@@ -107,7 +107,6 @@ export function FileUploader({ files, setFiles }: FileUploaderProps) {
                       </button>
                     </div>
 
-                    {/* Dropdown panel */}
                     {openDropDown === index && (
                     <div
                       className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
@@ -117,7 +116,6 @@ export function FileUploader({ files, setFiles }: FileUploaderProps) {
                       tabIndex={-1}
                     >
                       <div className="py-1" role="none">
-                        {/* Active: "bg-gray-100 text-gray-900", Inactive: "text-gray-700" */}
                         <a
                           href="#"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex"

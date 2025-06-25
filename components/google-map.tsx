@@ -156,6 +156,9 @@ export default function GoogleMapComponent({
 
   // Handle marker drag end
   const handleMarkerDragEnd = (event: google.maps.MapMouseEvent, record: AssetRecord, index: number) => {
+    console.log("event: ", event)
+    console.log("record: ", record)
+    console.log("index: ", index)
     if (!event.latLng || !onRecordUpdate) return
 
     const newLat = event.latLng.lat()
@@ -172,6 +175,13 @@ export default function GoogleMapComponent({
         source: record?.metadata?.georeference?.source ? `${record?.metadata?.georeference?.source} (adjusted)` : "manually adjusted",
       },
     }
+    console.log("new: ", 
+      newLat,
+      newLng,
+      record,
+      record?.metadata?.georeference,
+      record?.metadata?.georeference?.source ? `${record?.metadata?.georeference?.source} (adjusted)` : "manually adjusted",
+    );
 
     // Update the record
     onRecordUpdate(updatedRecord, index)
@@ -184,6 +194,8 @@ export default function GoogleMapComponent({
 
   // Create custom marker icon
   const createMarkerIcon = (record: AssetRecord, isSelected: boolean) => {
+    // console.log("record: ", record)
+    // console.log("isSelected: ", isSelected)
     if (typeof window === "undefined" || !window.google) return null
   
     const option = record?.selected_option || "N/A"

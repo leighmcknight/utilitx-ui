@@ -31,6 +31,8 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
   const [sortField, setSortField] = useState<SortField>("lat")
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
   const [detailRecord, setDetailRecord] = useState<AssetRecord | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
   const { toast } = useToast()
 
   const optionToDot = {
@@ -81,6 +83,42 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
     }
     return sortDirection === "asc" ? comparison : -comparison
   })
+
+  const handleOpenPreview = (index: number) => {
+    const filesRaw = sessionStorage.getItem("files")
+    if (!filesRaw) {
+      alert("No file preview found in sessionStorage.")
+      return
+    }
+
+    try {
+      const files = JSON.parse(filesRaw)
+      const file = files[index]
+
+      if (!file || !file.previewUrl) {
+        alert("No preview URL found for this file.")
+        return
+      }
+
+      const previewWindow = window.open()
+      if (previewWindow) {
+        previewWindow.document.write(`
+          <html>
+            <head><title>File Preview - ${file.name}</title></head>
+            <body style="margin:0">
+              <embed src="${file.previewUrl}" type="application/pdf" width="100%" height="100%" />
+            </body>
+          </html>
+        `)
+        previewWindow.document.close()
+      } else {
+        alert("Pop-up blocked. Please allow pop-ups.")
+      }
+    } catch (e) {
+      console.error("Error parsing sessionStorage files:", e)
+      alert("Failed to parse file preview.")
+    }
+  }
 
   const handleDelete = (index: number) => {
     toast({
@@ -332,6 +370,13 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                                   <p className="text-sm whitespace-pre-line mt-2">{detailRecord.text_blob_summary}</p>
                                 </div>
 
+                                <Button onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleOpenPreview(index)
+                                }}>
+                                  Preview File
+                                </Button>
+
                                 {detailRecord.text_blob_interpretation_labeled && (
                                   <div>
                                     <h3 className="text-lg font-semibold">Interpretation</h3>
@@ -344,30 +389,6 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                             )}
                           </DialogContent>
                         </Dialog>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">More options</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleView(index)}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEdit(index)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit Asset
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDelete(index)} className="text-red-600">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete Asset
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   )

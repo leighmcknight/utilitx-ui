@@ -10,8 +10,8 @@ export default function ProgressBar({ loading }: { loading: boolean }) {
     let interval: NodeJS.Timeout
 
     if (loading) {
-        // document.body.style.overflow = "hidden"
         setProgress(5)
+        // document.body.style.overflow = "hidden"
         interval = setInterval(() => {
             setProgress((prev) => (prev < 90 ? prev + Math.random() * 10 : prev))
         }, 30000)
