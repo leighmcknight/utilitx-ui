@@ -26,7 +26,7 @@ export function UploadForm() {
   const router = useRouter()
   // const { toast } = useToast()
   const { addRecords, setRecords } = useAppStore()
-  const { records } = useAppStore()
+  // const { records } = useAppStore()
 
   const [results, setResults] = useState<any[]>([]);
   const [regionName, setRegionName] = useState("");
@@ -58,9 +58,9 @@ export function UploadForm() {
     setValidationError(null)
   }
 
-  // const handleFilesSelected = (selectedFiles: UploadedWithOption[]) => {
-  //   setFiles(selectedFiles)
-  // }
+  const handleFilesSelected = (selectedFiles: UploadedWithOption[]) => {
+    setFiles(selectedFiles)
+  }
 
   // const handleProcessComplete = (processResults: any[]) => {
   //   setResults(processResults)
@@ -84,6 +84,16 @@ export function UploadForm() {
       mapRef.current.scrollIntoView({ behavior: "smooth" })
     }
   }
+
+  const getFilePreviewData = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        resolve(e.target?.result as string);
+      };
+      reader.readAsDataURL(file); // for base64 image/pdf
+    });
+  };
 
   const handleSubmitReal = async () => {
     sessionStorage.clear();
@@ -116,16 +126,6 @@ export function UploadForm() {
     form.append("region", regionName);
     form.append("bbox", JSON.stringify(boundingBox));
     Array.from(files).forEach((file) => form.append("files", file.file));
-
-    const getFilePreviewData = (file: File): Promise<string> => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          resolve(e.target?.result as string);
-        };
-        reader.readAsDataURL(file); // for base64 image/pdf
-      });
-    };
     
     // When storing files
     const filesWithPreview = await Promise.all(
@@ -136,6 +136,7 @@ export function UploadForm() {
       }))
     );
     
+    console.log("in upload: ", filesWithPreview);
     sessionStorage.setItem("files", JSON.stringify(filesWithPreview));
   
     try {

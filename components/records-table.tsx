@@ -6,15 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { getScoreColor } from "@/lib/utils"
-import { FileText, MoreHorizontal, ChevronUp, ChevronDown, ArrowUpDown, Eye, Edit, Trash2 } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { FileText, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react"
+// Lucide commented: MoreHorizontal, Eye, Edit, Trash2
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuLabel,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import type { AssetRecord } from "@/lib/store"
 
@@ -57,6 +58,8 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
 
   const sortedRecords = [...records].sort((a, b) => {
     let comparison = 0
+
+    console.log("in records Table: ", records)
 
     // Ensure metadata.georeference exists before accessing properties
     if (!a?.metadata?.georeference || !b?.metadata?.georeference) return 0
@@ -101,6 +104,7 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
       }
 
       const previewWindow = window.open()
+
       if (previewWindow) {
         previewWindow.document.write(`
           <html>
@@ -278,48 +282,72 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Asset Details</DialogTitle>
+                            <DialogHeader className="grid grid-cols-2 gap-2 mt-2">
+                              <DialogTitle className="preview-header text-3xl">Asset Details</DialogTitle>
+                              <Button className="preview-file-button" onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleOpenPreview(index)
+                                }}>
+                                  Preview File
+                                </Button>
                             </DialogHeader>
+                            {detailRecord && detailRecord.selected_option && (() => {
+                              const option = detailRecord.selected_option || "N/A"
+                              if (option in optionToDot) {
+                                const dot = optionToDot[option as keyof typeof optionToDot]
+                                return (
+                                  <div className="flex items-center space-x-6">
+                                    <div className={`w-6 h-6 rounded-full ${dot.color}`} />
+                                    <div>
+                                      <h3 className="text-lg font-bold">File Type</h3>
+                                      <p className="text-sm whitespace-pre-line mt-2">{detailRecord.selected_option}</p>
+                                    </div>
+                                  </div>
+                                )
+                              }
+
+                              return null
+                            })()}
+
                             {detailRecord && detailRecord?.metadata?.georeference && (
                               <div className="space-y-4">
                                 <div>
-                                  <h3 className="text-lg font-semibold">metadata.georeference</h3>
+                                  <h4 className="text-lg font-bold">Georeference Data</h4>
                                   <div className="grid grid-cols-2 gap-2 mt-2">
                                     <div>
-                                      <p className="text-sm font-medium">Latitude</p>
+                                      <p className="text-sm font-semibold">Latitude</p>
                                       <p className="text-sm">{detailRecord?.metadata?.georeference.lat.toFixed(6)}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Longitude</p>
+                                      <p className="text-sm font-semibold">Longitude</p>
                                       <p className="text-sm">{detailRecord?.metadata?.georeference.lon.toFixed(6)}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Confidence</p>
+                                      <p className="text-sm font-semibold">Confidence</p>
                                       <p className="text-sm">
                                         {(detailRecord?.metadata?.georeference.conf * 100).toFixed(0) + "%"}
                                       </p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Source</p>
+                                      <p className="text-sm font-semibold">Source</p>
                                       <p className="text-sm">{detailRecord?.metadata?.georeference.source || "N/A"}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Intersection</p>
+                                      <p className="text-sm font-semibold">Intersection</p>
                                       <p className="text-sm">{detailRecord?.metadata?.georeference.intersection || "N/A"}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Address</p>
+                                      <p className="text-sm font-semibold">Address</p>
                                       <p className="text-sm">{detailRecord?.metadata?.georeference.address || "N/A"}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Trust Score</p>
+                                      <p className="text-sm font-semibold">Trust Score</p>
                                       <p className="text-sm">
                                         {(detailRecord?.metadata?.georeference.trust_score * 100).toFixed(0) + "%"}
                                       </p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Fallback Used</p>
+                                      <p className="text-sm font-semibold">Fallback Used</p>
                                       <p className="text-sm">
                                         {detailRecord?.metadata?.georeference.fallback_used ? "Yes" : "No"}
                                       </p>
@@ -327,37 +355,35 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                                   </div>
                                 </div>
 
-                                {detailRecord.bounding_box && (
+                                {detailRecord.metadata.bounding_box && (
                                   <div>
-                                    <h3 className="text-lg font-semibold">Bounding Box</h3>
+                                    <h4 className="text-lg font-bold">Bounding Box</h4>
                                     <div className="grid grid-cols-2 gap-2 mt-2">
                                       <div>
-                                        <p className="text-sm font-medium">Southwest</p>
+                                        <p className="text-sm font-semibold"> Southwest</p>
                                         <p className="text-sm">
-                                          {`${detailRecord.bounding_box.southwest.lat.toFixed(
-                                            6,
-                                          )}, ${detailRecord.bounding_box.southwest.lng.toFixed(6)}`}
+                                          {`${detailRecord.metadata.bounding_box.southwest.lat.toFixed(6)}, ${detailRecord.metadata.bounding_box.southwest.lng.toFixed(6)}`}
                                         </p>
                                       </div>
                                       <div>
-                                        <p className="text-sm font-medium">Northeast</p>
+                                        <p className="text-sm font-semibold">Northeast</p>
                                         <p className="text-sm">
-                                          {`${detailRecord.bounding_box.northeast.lat.toFixed(
+                                          {`${detailRecord.metadata.bounding_box.northeast.lat.toFixed(
                                             6,
-                                          )}, ${detailRecord.bounding_box.northeast.lng.toFixed(6)}`}
+                                          )}, ${detailRecord.metadata.bounding_box.northeast.lng.toFixed(6)}`}
                                         </p>
                                       </div>
                                     </div>
                                   </div>
                                 )}
 
-                                {detailRecord.tiles && (
+                                {detailRecord.metadata.tiles && (
                                   <div>
-                                    <h3 className="text-lg font-semibold">Tiles</h3>
+                                    <h3 className="text-lg font-bold">Tiles</h3>
                                     <div className="grid grid-cols-1 gap-2 mt-2">
-                                      {Object.entries(detailRecord.tiles).map(([key, tile]) => (
+                                      {Object.entries(detailRecord.metadata.tiles).map(([key, tile]) => (
                                         <div key={key} className="border p-2 rounded-md">
-                                          <p className="text-sm font-medium">{key}</p>
+                                          <p className="text-sm font-semibold">{key}</p>
                                           <p className="text-sm whitespace-pre-line">{tile.text_blob}</p>
                                         </div>
                                       ))}
@@ -366,20 +392,13 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                                 )}
 
                                 <div>
-                                  <h3 className="text-lg font-semibold">Summary</h3>
+                                  <h3 className="text-lg font-bold">Summary</h3>
                                   <p className="text-sm whitespace-pre-line mt-2">{detailRecord.text_blob_summary}</p>
                                 </div>
 
-                                <Button onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleOpenPreview(index)
-                                }}>
-                                  Preview File
-                                </Button>
-
                                 {detailRecord.text_blob_interpretation_labeled && (
                                   <div>
-                                    <h3 className="text-lg font-semibold">Interpretation</h3>
+                                    <h3 className="text-lg font-bold">Interpretation</h3>
                                     <p className="text-sm whitespace-pre-line mt-2">
                                       {detailRecord.text_blob_interpretation_labeled}
                                     </p>

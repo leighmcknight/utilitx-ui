@@ -42,23 +42,29 @@ export function RecordsView() {
       try {
         const parsedRecords = JSON.parse(stored);
         const parsedFiles = storedFiles ? JSON.parse(storedFiles) : [];
-      
+
+        const normalize = (name: string) =>
+          name?.toLowerCase().replace(/-p\d+$/, "").replace(/\.[^/.]+$/, ""); // no extension
+
         const fileOptionMap = Object.fromEntries(
-          parsedFiles.map(({ file, option }: { file: { name: string }, option: string }) => [
-            file?.name.replace(/^\.\/+/, ""),
+          parsedFiles.map(({ name, option }: { name: string, option: string }) => [
+            normalize(name),
             option,
           ])
-        );
+        )
 
         const enriched = parsedRecords.map((record: any) => {
-          const nameFromRecord = record.record_id?.replace(/-p\d+$/, "");
-          const matchedOption = fileOptionMap[nameFromRecord];
+          const baseFileName = record.record_id?.replace(/-p\d+$/, ""); // just trims the `-p00`
+          const normalized = normalize(baseFileName);
+          const matchedOption = fileOptionMap[normalized];
         
           return {
             ...record,
             selected_option: matchedOption || null,
           };
         });
+
+        console.log("enriched: ", enriched)
 
         setIngestedData(enriched);
         setWorkingRecords(enriched);

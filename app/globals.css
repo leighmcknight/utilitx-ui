@@ -197,6 +197,15 @@ body {
   align-content: center;
 }
 
+.preview-header{
+  margin: auto 0;
+}
+
+.preview-file-button{
+  width: 30%;
+  margin: auto 0 auto auto;
+}
+
 @layer base {
   * {
     @apply border-border;
