@@ -206,6 +206,10 @@ body {
   margin: auto 0 auto auto;
 }
 
+.full-width{
+  max-width: 100%;
+}
+
 @layer base {
   * {
     @apply border-border;

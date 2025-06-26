@@ -17,8 +17,6 @@ export function FileUploader({ files, setFiles }: FileUploaderProps) {
   const [selectedOption, setSelectedOption] = useState<Record<number, string>>({})
   const [openDropDown, setOpenDropdown] = useState<number | null>(null)
 
-  console.log(selectedOption)
-
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const wrapped = acceptedFiles.map(file => ({ file }))

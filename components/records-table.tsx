@@ -58,9 +58,6 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
 
   const sortedRecords = [...records].sort((a, b) => {
     let comparison = 0
-
-    console.log("in records Table: ", records)
-
     // Ensure metadata.georeference exists before accessing properties
     if (!a?.metadata?.georeference || !b?.metadata?.georeference) return 0
 

@@ -31,7 +31,7 @@ export function RecordsView() {
   const [workingRecords, setWorkingRecords] = useState<AssetRecord[]>([])
   const [hasModifiedRecords, setHasModifiedRecords] = useState(false)
   
-  const { records } = useAppStore()
+  // const { records } = useAppStore()
 
   const [ingestedData, setIngestedData] = useState(null)
 
@@ -63,8 +63,6 @@ export function RecordsView() {
             selected_option: matchedOption || null,
           };
         });
-
-        console.log("enriched: ", enriched)
 
         setIngestedData(enriched);
         setWorkingRecords(enriched);
@@ -99,7 +97,6 @@ export function RecordsView() {
 
     // Source filter
     const matchesSource = sourceFilter.length === 0 || (record?.metadata?.georeference.source && sourceFilter.includes(record?.metadata?.georeference.source))
-
   
     return matchesSearch && matchesSource
   });
@@ -128,15 +125,15 @@ export function RecordsView() {
   
   // Calculate stats
   const totalRecords = displayRecords.length
-  const lowConfidenceCount = displayRecords.filter((r) => r?.metadata?.georeference?.conf < 0.7).length
+  // const lowConfidenceCount = displayRecords.filter((r) => r?.metadata?.georeference?.conf < 0.7).length
 
-  const avgTrustScore =
-    displayRecords.length > 0
-    ? Math.round(
-      (displayRecords.reduce((sum, r) => sum + (r?.metadata?.georeference?.trust_score || 0), 0) / displayRecords.length) *
-      100,
-    )
-    : 0
+  // const avgTrustScore =
+  //   displayRecords.length > 0
+  //   ? Math.round(
+  //     (displayRecords.reduce((sum, r) => sum + (r?.metadata?.georeference?.trust_score || 0), 0) / displayRecords.length) *
+  //     100,
+  //   )
+  //   : 0
 
   if (isEmpty) {
     return (
@@ -162,7 +159,7 @@ export function RecordsView() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
           <Input
             type="search"
-            placeholder="Search records..."
+            placeholder="Search records using intersection, summary or address..."
             className="pl-8"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
