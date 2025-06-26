@@ -1,20 +1,27 @@
 "use client"
 
-
+import { useEffect, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertTriangle } from "lucide-react"
 
 export function Error() {
-  const storedError = sessionStorage.getItem("error");
-  const error = storedError ? JSON.parse(storedError) : null;
+  const [error, setError] = useState<{ detail: string } | null>(null)
+
+  useEffect(() => {
+    const storedError = sessionStorage.getItem("error")
+    const parsed = storedError ? JSON.parse(storedError) : null
+    setError(parsed)
+  }, [])
 
   return (
     <div>
-      <Alert variant="destructive" className="mt-4">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error?.detail}</AlertDescription>
-      </Alert>
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error.detail}</AlertDescription>
+        </Alert>
+      )}
     </div>
   )
 }
