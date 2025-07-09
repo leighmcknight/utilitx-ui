@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 export default function Navbar() {
   return (
     <header className="border-b">
-      <div className="container flex h-16 items-center px-4">
+      <div className="container flex h-16 items-center px-4 full-width">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo-dark.png" alt="UTILITX" width={40} height={40} className="dark:hidden" />
           <Image src="/logo-light.png" alt="UTILITX" width={40} height={40} className="hidden dark:block" />
@@ -20,7 +20,7 @@ export default function Navbar() {
             Upload
           </Link>
           <Link href="/records" className="text-sm font-medium transition-colors hover:text-primary">
-            Records
+            Visualize
           </Link>
         </nav>
         <ThemeToggle />

@@ -26,6 +26,17 @@ const defaultZoom = 4
 // Use the provided API key
 const GOOGLE_MAPS_API_KEY = "AIzaSyBm0xX2JVYtdsVnO78koeR6bIkBpz8hAYQ"
 
+const optionToDotColor: Record<string, string> = {
+  "Electric Power Lines, Cables, Conduit and Lighting Cables": "red",
+  "Gas, Oil, Steam, Petroleum or Gaseous Materials": "yellow",
+  "Communications, Alarm or Signal Lines, Cables or Conduit": "orange",
+  "Potable Water": "blue",
+  "Reclaimed Water, Irrigation and Slurry Lines": "purple",
+  "Sewer and Drain Lines": "green",
+  "Temporary Survey Markings": "pink",
+  "Proposed Excavation": "white",
+}
+
 interface GoogleMapComponentProps {
   records: AssetRecord[]
   selectedRecord: string | null
@@ -145,6 +156,9 @@ export default function GoogleMapComponent({
 
   // Handle marker drag end
   const handleMarkerDragEnd = (event: google.maps.MapMouseEvent, record: AssetRecord, index: number) => {
+    console.log("event: ", event)
+    console.log("record: ", record)
+    console.log("index: ", index)
     if (!event.latLng || !onRecordUpdate) return
 
     const newLat = event.latLng.lat()
@@ -161,6 +175,13 @@ export default function GoogleMapComponent({
         source: record?.metadata?.georeference?.source ? `${record?.metadata?.georeference?.source} (adjusted)` : "manually adjusted",
       },
     }
+    console.log("new: ", 
+      newLat,
+      newLng,
+      record,
+      record?.metadata?.georeference,
+      record?.metadata?.georeference?.source ? `${record?.metadata?.georeference?.source} (adjusted)` : "manually adjusted",
+    );
 
     // Update the record
     onRecordUpdate(updatedRecord, index)
@@ -172,12 +193,17 @@ export default function GoogleMapComponent({
   }
 
   // Create custom marker icon
-  const createMarkerIcon = (isSelected: boolean) => {
+  const createMarkerIcon = (record: AssetRecord, isSelected: boolean) => {
+    // console.log("record: ", record)
+    // console.log("isSelected: ", isSelected)
     if (typeof window === "undefined" || !window.google) return null
-
+  
+    const option = record?.selected_option || "N/A"
+    const fillColor = optionToDotColor[option] || "gray" // fallback color
+  
     return {
       path: window.google.maps.SymbolPath.CIRCLE,
-      fillColor: getTrustScoreColor(),
+      fillColor,
       fillOpacity: 1,
       scale: isSelected ? 10 : 8,
       strokeColor: "#FFFFFF",
@@ -309,7 +335,7 @@ export default function GoogleMapComponent({
                 lng: record?.metadata?.georeference?.lon,
               }}
               onClick={() => handleMarkerClick(record, index)}
-              icon={createMarkerIcon(isSelected) ?? undefined}
+              icon={createMarkerIcon(record, isSelected) ?? undefined}
               zIndex={isSelected ? 1000 : 1}
               animation={
                 isSelected && typeof window !== "undefined" && window.google

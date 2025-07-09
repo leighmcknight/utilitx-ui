@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useAppStore, type AssetRecord } from "@/lib/store"
+import { UploadedWithOption, useAppStore, type AssetRecord } from "@/lib/store"
 import { useRouter } from "next/navigation"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
@@ -30,81 +30,76 @@ export function RecordsView() {
   const [view, setView] = useState<"list" | "map">("list")
   const [workingRecords, setWorkingRecords] = useState<AssetRecord[]>([])
   const [hasModifiedRecords, setHasModifiedRecords] = useState(false)
-  const { records } = useAppStore()
+  
+  // const { records } = useAppStore()
 
   const [ingestedData, setIngestedData] = useState(null)
 
-
-  // Initialize working records from store records
-  // useEffect(() => {
-  //   setWorkingRecords(records)
-  //   setHasModifiedRecords(false)
-  // }, [records])
-
-
-  // const responseData = useAppStore((state) => state.responseData);
-
   useEffect(() => {
     const stored = sessionStorage.getItem("records");
+    let storedFiles = sessionStorage.getItem("files");
     if (stored) {
-      console.log(stored);
-      try{
-        setIngestedData(JSON.parse(stored));
-        setWorkingRecords(JSON.parse(stored));
-      } catch(e){
-        console.error("Error parsing stored records:", e);
+      try {
+        const parsedRecords = JSON.parse(stored);
+        const parsedFiles = storedFiles ? JSON.parse(storedFiles) : [];
+
+        const normalize = (name: string) =>
+          name?.toLowerCase().replace(/-p\d+$/, "").replace(/\.[^/.]+$/, ""); // no extension
+
+        const fileOptionMap = Object.fromEntries(
+          parsedFiles.map(({ name, option }: { name: string, option: string }) => [
+            normalize(name),
+            option,
+          ])
+        )
+
+        const enriched = parsedRecords.map((record: any) => {
+          const baseFileName = record.record_id?.replace(/-p\d+$/, ""); // just trims the `-p00`
+          const normalized = normalize(baseFileName);
+          const matchedOption = fileOptionMap[normalized];
+        
+          return {
+            ...record,
+            selected_option: matchedOption || null,
+          };
+        });
+
+        setIngestedData(enriched);
+        setWorkingRecords(enriched);
+      } catch (e) {
+        console.error("Error parsing session data:", e);
       }
-      // const parsedRecords = JSON.parse(stored);
     }
   }, []);
 
-
   // Use uploaded records
   const displayRecords = workingRecords.length > 0 ? workingRecords : []
-  console.log("displayRecords: ", displayRecords)
   const isEmpty = displayRecords.length === 0
-  console.log("isEmpty: ", isEmpty)
   
   // Get unique sources for filters
   const sources = Array.from(new Set(displayRecords.map((record: any) => record?.metadata?.georeference?.source).filter(Boolean)))
-  console.log("sources: ", sources)
 
   const filteredRecords = displayRecords.filter((record) => {
     record.text_blob_summary = record.text_blob_summary || "Summary of utility drawing..."
-    console.log("record.text_blob_summary: ", record.text_blob_summary);
     
     // Ensure all properties exist before accessing them
     if (!record.text_blob_summary || !record?.metadata?.georeference) return false
     
     // Text search in summary or intersection
     const summaryMatch = record.text_blob_summary.toLowerCase().includes(searchQuery.toLowerCase())
-    console.log("summaryMatch: ", summaryMatch);
 
     const intersectionMatch = record?.metadata?.georeference.intersection &&
     record?.metadata?.georeference.intersection.toString().toLowerCase().includes(searchQuery.toLowerCase())
 
-    console.log("intersectionMatch: ", intersectionMatch);
-
     const addressMatch = record?.metadata?.georeference.address && record?.metadata?.georeference.address.toLowerCase().includes(searchQuery.toLowerCase());  
 
-    console.log("addressMatch: ", addressMatch);
-
     const matchesSearch = searchQuery === "" || summaryMatch || intersectionMatch || addressMatch;
-    
-    console.log("matchesSearch: ", matchesSearch);
-
 
     // Source filter
     const matchesSource = sourceFilter.length === 0 || (record?.metadata?.georeference.source && sourceFilter.includes(record?.metadata?.georeference.source))
-
-    console.log("matchesSource: ", matchesSource);
   
     return matchesSearch && matchesSource
   });
-
-  console.log("filteredRecords: ", filteredRecords);
-  console.log("selectedRecord: ", selectedRecord);
-  // console.log("handleRecordSelect: ", handleRecordSelect);
 
   const handleRecordSelect = (id: string) => {
     setSelectedRecord(id === selectedRecord ? null : id)
@@ -124,28 +119,21 @@ export function RecordsView() {
 
   // Function to get a unique ID for each record
   const getRecordId = (record: AssetRecord, index: number) => {
-    // TODO: REMOVE THIS LOGGING
-    console.log("record.metadata.georeference: ", record.metadata.georeference)
     if (!record?.metadata?.georeference) return `record-${index}`
     return `${record?.metadata?.georeference.lat}-${record?.metadata?.georeference.lon}-${index}`
   }
   
   // Calculate stats
   const totalRecords = displayRecords.length
-  // TODO: REMOVE THIS LOGGING
-  console.log("totalRecords: ", totalRecords)
-  const lowConfidenceCount = displayRecords.filter((r) => r?.metadata?.georeference?.conf < 0.7).length
-  // TODO: REMOVE THIS LOGGING
-  console.log("lowConfidenceCount: ", lowConfidenceCount)
-  const avgTrustScore =
-    displayRecords.length > 0
-    ? Math.round(
-      (displayRecords.reduce((sum, r) => sum + (r?.metadata?.georeference?.trust_score || 0), 0) / displayRecords.length) *
-      100,
-    )
-    : 0
-    // TODO: REMOVE THIS LOGGING
-  console.log("avgTrustScore: ", avgTrustScore)
+  // const lowConfidenceCount = displayRecords.filter((r) => r?.metadata?.georeference?.conf < 0.7).length
+
+  // const avgTrustScore =
+  //   displayRecords.length > 0
+  //   ? Math.round(
+  //     (displayRecords.reduce((sum, r) => sum + (r?.metadata?.georeference?.trust_score || 0), 0) / displayRecords.length) *
+  //     100,
+  //   )
+  //   : 0
 
   if (isEmpty) {
     return (
@@ -171,7 +159,7 @@ export function RecordsView() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
           <Input
             type="search"
-            placeholder="Search records..."
+            placeholder="Search records using intersection, summary or address..."
             className="pl-8"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -216,8 +204,8 @@ export function RecordsView() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="record-count">
           <CardContent className="p-6 flex flex-col items-center">
             <div className="text-4xl font-bold">{totalRecords}</div>
             <div className="text-sm text-gray-500">Total Records</div>
@@ -225,14 +213,50 @@ export function RecordsView() {
         </Card>
         <Card>
           <CardContent className="p-6 flex flex-col items-center">
-            <div className="text-4xl font-bold">{lowConfidenceCount}</div>
-            <div className="text-sm text-gray-500">Low Confidence</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6 flex flex-col items-center">
-            <div className="text-4xl font-bold">{avgTrustScore}%</div>
-            <div className="text-sm text-gray-500">Trust Score (Avg)</div>
+            <p className="text-xl font-bold gap-2">Colour coding is used to display the primary asset as built was submitted for.</p>
+            <hr />
+            <div className="md:grid-cols-3 grid content-start gap-2">
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full red-dot mr-2">
+                </div>
+                <p className="text-sm">Electric Power Lines, Cables, Conduit and Lighting Cables</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full yellow-dot mr-2">
+                </div>
+                <p className="text-sm">Gas, Oil, Steam, Petroleum or Gaseous Materials</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full orange-dot mr-2">
+                </div>
+                <p className="text-sm">Communications, Alarm or Signal Lines, Cables or Conduit</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full blue-dot mr-2">
+                </div>
+                <p className="text-sm">Potable Water</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full purple-dot mr-2">
+                </div>
+                <p className="text-sm">Reclaimed Water, Irrigation and Slurry Lines</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full green-dot mr-2">
+                </div>
+                <p className="text-sm">Sewer and Drain Lines</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full pink-dot mr-2">
+                </div>
+                <p className="text-sm">Temporary Survey Markings</p>
+              </div>
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full white-dot mr-2">
+                </div>
+                <p className="text-sm">Proposed Excavation</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

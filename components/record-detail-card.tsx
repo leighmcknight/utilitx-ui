@@ -90,14 +90,14 @@ export function RecordDetailCard({ record, onClose }: RecordDetailCardProps) {
           </div>
         )}
 
-        {record.tiles && Object.keys(record.tiles).length > 0 && (
+        {record.metadata.tiles && Object.keys(record.metadata.tiles).length > 0 && (
           <div className="p-3 border-b">
             <h3 className="font-medium text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
               <Tag className="h-3.5 w-3.5" />
               Text Extractions
             </h3>
             <div className="max-h-40 overflow-y-auto pr-2">
-              {Object.entries(record.tiles).map(([key, tile]) => (
+              {Object.entries(record.metadata.tiles).map(([key, tile]) => (
                 <div key={key} className="mb-2 last:mb-0">
                   <p className="text-xs font-medium text-muted-foreground">{key}</p>
                   <p className="text-sm bg-muted/30 p-2 rounded-md">{tile.text_blob}</p>

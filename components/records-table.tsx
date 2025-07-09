@@ -6,15 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { getScoreColor } from "@/lib/utils"
-import { FileText, MoreHorizontal, ChevronUp, ChevronDown, ArrowUpDown, Eye, Edit, Trash2 } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { FileText, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react"
+// Lucide commented: MoreHorizontal, Eye, Edit, Trash2
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuLabel,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import type { AssetRecord } from "@/lib/store"
 
@@ -28,15 +29,23 @@ type SortField = "lat" | "lon" | "conf" | "source" | "trust_score" | "fallback_u
 type SortDirection = "asc" | "desc"
 
 export function RecordsTable({ records, selectedRecord, onSelectRecord }: RecordsTableProps) {
-
-  console.log("records: ", records)
-  console.log("selectedRecord: ", selectedRecord)
-  console.log("onSelectRecord: ", onSelectRecord)
-
   const [sortField, setSortField] = useState<SortField>("lat")
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
   const [detailRecord, setDetailRecord] = useState<AssetRecord | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
   const { toast } = useToast()
+
+  const optionToDot = {
+    "Electric Power Lines, Cables, Conduit and Lighting Cables": { color: "red-dot", label: "Electric Power Lines, Cables, Conduit and Lighting Cables" },
+    "Gas, Oil, Steam, Petroleum or Gaseous Materials": { color: "yellow-dot", label: "Gas, Oil, Steam, Petroleum or Gaseous Materials" },
+    "Communications, Alarm or Signal Lines, Cables or Conduit": { color: "orange-dot", label: "Communications, Alarm or Signal Lines, Cables or Conduit" },
+    "Potable Water": { color: "blue-dot", label: "Potable Water" },
+    "Reclaimed Water, Irrigation and Slurry Lines": { color: "purple-dot", label: "Reclaimed Water, Irrigation and Slurry Lines" },
+    "Sewer and Drain Lines": { color: "green-dot", label: "Sewer and Drain Lines" },
+    "Temporary Survey Markings": { color: "pink-dot", label: "Temporary Survey Markings" },
+    "Proposed Excavation": { color: "white-dot", label: "Proposed Excavation" },
+  };
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -49,9 +58,6 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
 
   const sortedRecords = [...records].sort((a, b) => {
     let comparison = 0
-
-    // latitude
-    // longitude
     // Ensure metadata.georeference exists before accessing properties
     if (!a?.metadata?.georeference || !b?.metadata?.georeference) return 0
 
@@ -77,6 +83,43 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
     }
     return sortDirection === "asc" ? comparison : -comparison
   })
+
+  const handleOpenPreview = (index: number) => {
+    const filesRaw = sessionStorage.getItem("files")
+    if (!filesRaw) {
+      alert("No file preview found in sessionStorage.")
+      return
+    }
+
+    try {
+      const files = JSON.parse(filesRaw)
+      const file = files[index]
+
+      if (!file || !file.previewUrl) {
+        alert("No preview URL found for this file.")
+        return
+      }
+
+      const previewWindow = window.open()
+
+      if (previewWindow) {
+        previewWindow.document.write(`
+          <html>
+            <head><title>File Preview - ${file.name}</title></head>
+            <body style="margin:0">
+              <embed src="${file.previewUrl}" type="application/pdf" width="100%" height="100%" />
+            </body>
+          </html>
+        `)
+        previewWindow.document.close()
+      } else {
+        alert("Pop-up blocked. Please allow pop-ups.")
+      }
+    } catch (e) {
+      console.error("Error parsing sessionStorage files:", e)
+      alert("Failed to parse file preview.")
+    }
+  }
 
   const handleDelete = (index: number) => {
     toast({
@@ -115,6 +158,7 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
     if (!text) return "N/A"
     return text.length > maxLength ? text.substring(0, maxLength) + "..." : text
   }
+  
 
   return (
     <>
@@ -123,6 +167,11 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
           <Table>
             <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
+                <TableHead className="cursor-pointer">
+                  <div className="flex items-center">
+                    File Type
+                  </div>
+                </TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort("lat")}>
                   <div className="flex items-center">
                     Latitude
@@ -173,38 +222,31 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                 </TableRow>
               ) : (
                 sortedRecords.map((record, index) => {
-                  // Skip records without metadata.georeference data
                   const recordId = getRecordId(record, index)
-                  console.log("recordId: ", recordId)
-                  console.log("record.metadata.georeference: ", record.metadata.georeference)
                   if (!record?.metadata?.georeference) return null
 
-                  // TODO: REMOVE THIS LOGGING
-                  console.log("!record.metadata.georeference: ", !record.metadata.georeference)
-                  console.log("selectedRecord === recordId: ", selectedRecord === recordId)
-                  console.log("starting return")
-                  console.log("record: ", record)
-                  console.log("record.metadata.georeference.lat: ", record.metadata.georeference.lat)
-                  console.log("record.metadata.georeference.lon: ", record.metadata.georeference.lon)
-                  console.log("record.metadata.georeference.conf: ", record.metadata.georeference.conf)
-                  console.log("record.metadata.georeference.source: ", record.metadata.georeference.source)
-                  // console.log("record.metadata.georeference.intersection: ", record.metadata.georeference.intersection.length)
-                  console.log("record.metadata.georeference.intersection: ", detailRecord)
-
-                  // record.metadata.georeference.intersection
-
-
                   return (
-                    // <div></div>
                     <TableRow
                       key={recordId}
                       className={`cursor-pointer ${selectedRecord === recordId ? "bg-muted/50" : ""}`}
                       onClick={() => onSelectRecord(recordId)}
                     >
-                      {/* .toFixed(6)
-                      .toFixed(6) */}
-                      <TableCell>{record?.metadata?.georeference.lat|| "N/A"}</TableCell>
-                      <TableCell>{record?.metadata?.georeference.lon|| "N/A"}</TableCell>
+                      <TableCell>
+                        {(() => {
+                          const option = record?.selected_option || "N/A";
+
+                          if (option in optionToDot) {
+                            const dot = optionToDot[option as keyof typeof optionToDot];
+                            return (
+                              <div className="flex items-center">
+                                <div className={`w-6 h-6 rounded-full ${dot.color} mr-2`} />
+                              </div>
+                            );
+                          }
+                        })()}
+                      </TableCell>
+                      <TableCell>{record?.metadata?.georeference.lat.toFixed(6)|| "N/A"}</TableCell>
+                      <TableCell>{record?.metadata?.georeference.lon.toFixed(6)|| "N/A"}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={getScoreColor(Math.round(record?.metadata?.georeference.conf * 100))}>
                           {(record?.metadata?.georeference.conf * 100).toFixed(0)}%
@@ -212,9 +254,8 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                       </TableCell>
                       <TableCell>{record?.metadata?.georeference.source || "N/A"}</TableCell>
                       <TableCell>
-                        {/* {record?.metadata?.georeference.intersection|| "N/A"} */}
                         {Array.isArray(record?.metadata?.georeference.intersection)
-                        ? record?.metadata?.georeference.intersection.map((item: any) => item.name).join(", ")
+                        ? record?.metadata?.georeference.intersection.map((item: any) => item).join(", ")
                         : record?.metadata?.georeference.intersection || "N/A"}
                       </TableCell>
                       <TableCell>
@@ -238,48 +279,72 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Asset Details</DialogTitle>
+                            <DialogHeader className="grid grid-cols-2 gap-2 mt-2">
+                              <DialogTitle className="preview-header text-3xl">Asset Details</DialogTitle>
+                              <Button className="preview-file-button" onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleOpenPreview(index)
+                                }}>
+                                  Preview File
+                                </Button>
                             </DialogHeader>
+                            {detailRecord && detailRecord.selected_option && (() => {
+                              const option = detailRecord.selected_option || "N/A"
+                              if (option in optionToDot) {
+                                const dot = optionToDot[option as keyof typeof optionToDot]
+                                return (
+                                  <div className="flex items-center space-x-6">
+                                    <div className={`w-6 h-6 rounded-full ${dot.color}`} />
+                                    <div>
+                                      <h3 className="text-lg font-bold">File Type</h3>
+                                      <p className="text-sm whitespace-pre-line mt-2">{detailRecord.selected_option}</p>
+                                    </div>
+                                  </div>
+                                )
+                              }
+
+                              return null
+                            })()}
+
                             {detailRecord && detailRecord?.metadata?.georeference && (
                               <div className="space-y-4">
                                 <div>
-                                  <h3 className="text-lg font-semibold">metadata.georeference</h3>
+                                  <h4 className="text-lg font-bold">Georeference Data</h4>
                                   <div className="grid grid-cols-2 gap-2 mt-2">
                                     <div>
-                                      <p className="text-sm font-medium">Latitude</p>
+                                      <p className="text-sm font-semibold">Latitude</p>
                                       <p className="text-sm">{detailRecord?.metadata?.georeference.lat.toFixed(6)}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Longitude</p>
+                                      <p className="text-sm font-semibold">Longitude</p>
                                       <p className="text-sm">{detailRecord?.metadata?.georeference.lon.toFixed(6)}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Confidence</p>
+                                      <p className="text-sm font-semibold">Confidence</p>
                                       <p className="text-sm">
                                         {(detailRecord?.metadata?.georeference.conf * 100).toFixed(0) + "%"}
                                       </p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Source</p>
+                                      <p className="text-sm font-semibold">Source</p>
                                       <p className="text-sm">{detailRecord?.metadata?.georeference.source || "N/A"}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Intersection</p>
+                                      <p className="text-sm font-semibold">Intersection</p>
                                       <p className="text-sm">{detailRecord?.metadata?.georeference.intersection || "N/A"}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Address</p>
+                                      <p className="text-sm font-semibold">Address</p>
                                       <p className="text-sm">{detailRecord?.metadata?.georeference.address || "N/A"}</p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Trust Score</p>
+                                      <p className="text-sm font-semibold">Trust Score</p>
                                       <p className="text-sm">
                                         {(detailRecord?.metadata?.georeference.trust_score * 100).toFixed(0) + "%"}
                                       </p>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-medium">Fallback Used</p>
+                                      <p className="text-sm font-semibold">Fallback Used</p>
                                       <p className="text-sm">
                                         {detailRecord?.metadata?.georeference.fallback_used ? "Yes" : "No"}
                                       </p>
@@ -287,37 +352,35 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                                   </div>
                                 </div>
 
-                                {detailRecord.bounding_box && (
+                                {detailRecord.metadata.bounding_box && (
                                   <div>
-                                    <h3 className="text-lg font-semibold">Bounding Box</h3>
+                                    <h4 className="text-lg font-bold">Bounding Box</h4>
                                     <div className="grid grid-cols-2 gap-2 mt-2">
                                       <div>
-                                        <p className="text-sm font-medium">Southwest</p>
+                                        <p className="text-sm font-semibold"> Southwest</p>
                                         <p className="text-sm">
-                                          {`${detailRecord.bounding_box.southwest.lat.toFixed(
-                                            6,
-                                          )}, ${detailRecord.bounding_box.southwest.lng.toFixed(6)}`}
+                                          {`${detailRecord.metadata.bounding_box.southwest.lat.toFixed(6)}, ${detailRecord.metadata.bounding_box.southwest.lng.toFixed(6)}`}
                                         </p>
                                       </div>
                                       <div>
-                                        <p className="text-sm font-medium">Northeast</p>
+                                        <p className="text-sm font-semibold">Northeast</p>
                                         <p className="text-sm">
-                                          {`${detailRecord.bounding_box.northeast.lat.toFixed(
+                                          {`${detailRecord.metadata.bounding_box.northeast.lat.toFixed(
                                             6,
-                                          )}, ${detailRecord.bounding_box.northeast.lng.toFixed(6)}`}
+                                          )}, ${detailRecord.metadata.bounding_box.northeast.lng.toFixed(6)}`}
                                         </p>
                                       </div>
                                     </div>
                                   </div>
                                 )}
 
-                                {detailRecord.tiles && (
+                                {detailRecord.metadata.tiles && (
                                   <div>
-                                    <h3 className="text-lg font-semibold">Tiles</h3>
+                                    <h3 className="text-lg font-bold">Tiles</h3>
                                     <div className="grid grid-cols-1 gap-2 mt-2">
-                                      {Object.entries(detailRecord.tiles).map(([key, tile]) => (
+                                      {Object.entries(detailRecord.metadata.tiles).map(([key, tile]) => (
                                         <div key={key} className="border p-2 rounded-md">
-                                          <p className="text-sm font-medium">{key}</p>
+                                          <p className="text-sm font-semibold">{key}</p>
                                           <p className="text-sm whitespace-pre-line">{tile.text_blob}</p>
                                         </div>
                                       ))}
@@ -326,13 +389,13 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                                 )}
 
                                 <div>
-                                  <h3 className="text-lg font-semibold">Summary</h3>
+                                  <h3 className="text-lg font-bold">Summary</h3>
                                   <p className="text-sm whitespace-pre-line mt-2">{detailRecord.text_blob_summary}</p>
                                 </div>
 
                                 {detailRecord.text_blob_interpretation_labeled && (
                                   <div>
-                                    <h3 className="text-lg font-semibold">Interpretation</h3>
+                                    <h3 className="text-lg font-bold">Interpretation</h3>
                                     <p className="text-sm whitespace-pre-line mt-2">
                                       {detailRecord.text_blob_interpretation_labeled}
                                     </p>
@@ -342,30 +405,6 @@ export function RecordsTable({ records, selectedRecord, onSelectRecord }: Record
                             )}
                           </DialogContent>
                         </Dialog>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">More options</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleView(index)}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEdit(index)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit Asset
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDelete(index)} className="text-red-600">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete Asset
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   )

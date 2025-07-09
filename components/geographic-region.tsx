@@ -5,13 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { MapPin, AlertCircle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { loadGoogleMapsApi } from "@/lib/load-google-maps"
 import { DynamicBoundingBoxMap } from "./dynamic-map-components"
 import { ClientOnly } from "./client-only"
+import { Loader2, AlertTriangle } from "lucide-react"
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+
 
 interface GeographicRegionProps {
   onRegionSelected: (region: string, boundingBox: any) => void
+  onRegionNameChange?: (region: string) => void
   markers?: Array<{
     id: string
     lat: number
@@ -20,11 +24,15 @@ interface GeographicRegionProps {
   }>
 }
 
-export function GeographicRegion({ onRegionSelected, markers = [] }: GeographicRegionProps) {
+export function GeographicRegion({ onRegionSelected, onRegionNameChange, markers = [] }: GeographicRegionProps) {
   const [regionName, setRegionName] = useState("")
   const [boundingBox, setBoundingBox] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [validationError, setValidationError] = useState<string | null>(null)
+  const [bboxTouched, setBboxTouched] = useState(false);
+  
+  // setRegionName(regionName);
 
   const handleGetBoundingBox = async () => {
     if (!regionName) return
@@ -61,9 +69,6 @@ export function GeographicRegion({ onRegionSelected, markers = [] }: GeographicR
           setBoundingBox(newBoundingBox)
           onRegionSelected(regionName, newBoundingBox)
           setLoading(false)
-
-          console.log("regionName (in geographic): ", regionName);
-          console.log("boundingBox (in geographic): ", boundingBox);
         } else {
           setError(`Could not find region: ${status}`)
           setLoading(false)
@@ -102,7 +107,7 @@ export function GeographicRegion({ onRegionSelected, markers = [] }: GeographicR
       </div>
 
       <p className="text-gray-600 mb-4">
-        Enter a region name (e.g., "Durham Region, ON") to get its bounding box coordinates
+        Enter a region name (e.g., "Durham Region, ON"), and select "Get Bounding Box" to get its bounding box coordinates
       </p>
 
       <div className="mb-4">
@@ -113,7 +118,14 @@ export function GeographicRegion({ onRegionSelected, markers = [] }: GeographicR
           <Input
             id="region-name"
             value={regionName}
-            onChange={(e) => setRegionName(e.target.value)}
+            onChange={(e) => 
+            {
+              const newValue = e.target.value
+              setRegionName(newValue)
+              if (onRegionNameChange) onRegionNameChange(newValue)
+            }
+              
+            }
             placeholder="e.g., Durham Region, ON"
             className="flex-1"
           />
@@ -161,7 +173,7 @@ export function GeographicRegion({ onRegionSelected, markers = [] }: GeographicR
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-
+      
       {boundingBox && (
         <Card className="bg-gray-50">
           <CardContent className="p-4">

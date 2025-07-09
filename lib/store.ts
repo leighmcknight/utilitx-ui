@@ -6,6 +6,11 @@ export const useDataStore = create((set) => ({
 	setResponseData: (data: any) => set({ responseData: data }),
 }));
 
+export interface UploadedWithOption {
+	file: File;
+	option?: string;
+}
+
 // Define the new data structure based on the provided JSON
 export interface Tile {
 	text_blob: string;
@@ -51,6 +56,7 @@ export interface AssetRecord {
 	text_blob_interpretation_labeled?: string;
 	text_blob_summary?: string;
 	error: null | string;
+	selected_option: string;
 }
 
 interface AppState {
