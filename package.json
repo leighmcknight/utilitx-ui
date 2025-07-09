@@ -6,7 +6,7 @@
     "dev": "next dev",
     "start": "next start",
     "lint": "next lint",
-    "build": "next build && next export",
+    "build": "next build",
     "firebase-build": "next build && cp -r .next functions/next"
   },
   "dependencies": {
