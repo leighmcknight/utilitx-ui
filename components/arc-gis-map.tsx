@@ -14,10 +14,9 @@ export default function ArcGisMap({ gcpResponse }: ArcGisMapProps) {
 			const lat = gcpResponse[0].geometry.coordinates[1] || -79.6175911;
 			const zoom = 12;
 			const url = `https://arcgis-map.web.app/?lat=${lat}&lon=${lon}&zoom=${zoom}`;
-			console.log(url);
 			setIframeSrc(url);
 		}
 	}, [gcpResponse]);
 
-	return <iframe src={iframeSrc} width="100%" height="600" loading="lazy" />;
+	return <iframe src={iframeSrc} width="100%" height="1000" loading="lazy" />;
 }

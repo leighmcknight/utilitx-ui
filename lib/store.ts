@@ -57,6 +57,8 @@ export interface AssetRecord {
 	text_blob_summary?: string;
 	error: null | string;
 	selected_option: string;
+	file_url: string;
+	file_tag: string;
 }
 
 interface AppState {

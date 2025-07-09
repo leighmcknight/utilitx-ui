@@ -247,10 +247,14 @@ export function RecordsView() {
 					<Tabs
 						value={view}
 						onValueChange={(v) => setView(v as "list" | "map")}
-						className="w-[200px]">
+						className="w-[400px]">
 						<TabsList className="grid w-full grid-cols-2">
-							<TabsTrigger value="list">List</TabsTrigger>
-							<TabsTrigger value="map">Map</TabsTrigger>
+							<TabsTrigger value="list">
+								Files Uploaded
+							</TabsTrigger>
+							<TabsTrigger value="map">
+								View All Files
+							</TabsTrigger>
 						</TabsList>
 					</Tabs>
 				</div>
@@ -259,8 +263,8 @@ export function RecordsView() {
 			<div className="h-[calc(100vh-400px)] min-h-[500px]">
 				{view === "list" ? (
 					<>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<Card className="record-count">
+						<div className="grid grid-cols-1 md:grid-cols-4 gap-4 bottom-padding">
+							<Card className="record-count md:col-span-1">
 								<CardContent className="p-6 flex flex-col items-center">
 									<div className="text-4xl font-bold">
 										{totalRecords}
@@ -270,9 +274,9 @@ export function RecordsView() {
 									</div>
 								</CardContent>
 							</Card>
-							<Card>
+							<Card className="md:col-span-3">
 								<CardContent className="p-6 flex flex-col items-center">
-									<p className="text-xl font-bold gap-2">
+									<p className="text-xl font-bold gap-2 bottom-padding-small">
 										Colour coding is used to display the
 										primary asset as built was submitted
 										for.
@@ -335,90 +339,31 @@ export function RecordsView() {
 								</CardContent>
 							</Card>
 						</div>
-						<RecordsTable
-							records={filteredRecords}
-							selectedRecord={selectedRecord}
-							onSelectRecord={handleRecordSelect}
-						/>
+						<div className="bottom-padding space-y-4">
+							<p className="text-xl font-bold gap-2">
+								Summary of the files uploaded:
+							</p>
+							<RecordsTable
+								records={filteredRecords}
+								selectedRecord={selectedRecord}
+								onSelectRecord={handleRecordSelect}
+							/>
+						</div>
+						<div className="bottom-padding space-y-4">
+							<p className="text-xl font-bold gap-2">
+								Quick view of the files uploaded:
+							</p>
+							<RecordsMap
+								records={filteredRecords}
+								selectedRecord={selectedRecord}
+								onSelectRecord={handleRecordSelect}
+								// onRecordUpdate={handleRecordUpdate}
+								getRecordId={getRecordId}
+							/>
+						</div>
 					</>
 				) : (
-					<>
-						<div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-							<Card>
-								<CardContent className="p-6 flex flex-col items-center">
-									<p className="text-xl font-bold legend-header">
-										Colour coding is used to display the
-										primary asset as built was submitted
-										for.
-									</p>
-									<hr />
-									<div className="md:grid-cols-4 grid content-start gap-2">
-										<div className="flex items-center mb-4">
-											<div className="flex items-center justify-center w-8 h-8 rounded-full red-dot mr-2"></div>
-											<p className="text-sm">
-												Electric Power Lines, Cables,
-												Conduit and Lighting Cables
-											</p>
-										</div>
-										<div className="flex items-center mb-4">
-											<div className="flex items-center justify-center w-8 h-8 rounded-full yellow-dot mr-2"></div>
-											<p className="text-sm">
-												Gas, Oil, Steam, Petroleum or
-												Gaseous Materials
-											</p>
-										</div>
-										<div className="flex items-center mb-4">
-											<div className="flex items-center justify-center w-8 h-8 rounded-full orange-dot mr-2"></div>
-											<p className="text-sm">
-												Communications, Alarm or Signal
-												Lines, Cables or Conduit
-											</p>
-										</div>
-										<div className="flex items-center mb-4">
-											<div className="flex items-center justify-center w-8 h-8 rounded-full blue-dot mr-2"></div>
-											<p className="text-sm">
-												Potable Water
-											</p>
-										</div>
-										<div className="flex items-center mb-4">
-											<div className="flex items-center justify-center w-8 h-8 rounded-full purple-dot mr-2"></div>
-											<p className="text-sm">
-												Reclaimed Water, Irrigation and
-												Slurry Lines
-											</p>
-										</div>
-										<div className="flex items-center mb-4">
-											<div className="flex items-center justify-center w-8 h-8 rounded-full green-dot mr-2"></div>
-											<p className="text-sm">
-												Sewer and Drain Lines
-											</p>
-										</div>
-										<div className="flex items-center mb-4">
-											<div className="flex items-center justify-center w-8 h-8 rounded-full pink-dot mr-2"></div>
-											<p className="text-sm">
-												Temporary Survey Markings
-											</p>
-										</div>
-										<div className="flex items-center mb-4">
-											<div className="flex items-center justify-center w-8 h-8 rounded-full white-dot mr-2"></div>
-											<p className="text-sm">
-												Proposed Excavation
-											</p>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-						</div>
-						<ArcGisMap gcpResponse={ingestedData} />
-					</>
-
-					// <RecordsMap
-					// 	records={filteredRecords}
-					// 	selectedRecord={selectedRecord}
-					// 	onSelectRecord={handleRecordSelect}
-					// 	onRecordUpdate={handleRecordUpdate}
-					// 	getRecordId={getRecordId}
-					// />
+					<ArcGisMap gcpResponse={ingestedData} />
 				)}
 			</div>
 

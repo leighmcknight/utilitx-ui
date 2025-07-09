@@ -141,17 +141,16 @@ export function RecordsTable({
 	});
 
 	const handleOpenPreview = (index: number) => {
-		const filesRaw = sessionStorage.getItem("files");
-		if (!filesRaw) {
+		if (!records) {
 			alert("No file preview found in sessionStorage.");
 			return;
 		}
 
 		try {
-			const files = JSON.parse(filesRaw);
+			const files = records;
 			const file = files[index];
 
-			if (!file || !file.previewUrl) {
+			if (!file || !file.file_url) {
 				alert("No preview URL found for this file.");
 				return;
 			}
@@ -160,13 +159,13 @@ export function RecordsTable({
 
 			if (previewWindow) {
 				previewWindow.document.write(`
-          <html>
-            <head><title>File Preview - ${file.name}</title></head>
-            <body style="margin:0">
-              <embed src="${file.previewUrl}" type="application/pdf" width="100%" height="100%" />
-            </body>
-          </html>
-        `);
+					<html>
+						<head><title>File Preview - ${file.record_id}</title></head>
+						<body style="margin:0">
+						<embed src="https://docs.google.com/gview?embedded=true&url=${file.file_url}" type="application/pdf" width="100%" height="100%" />
+						</body>
+						</html>
+						`);
 				previewWindow.document.close();
 			} else {
 				alert("Pop-up blocked. Please allow pop-ups.");
@@ -176,7 +175,6 @@ export function RecordsTable({
 			alert("Failed to parse file preview.");
 		}
 	};
-
 	const handleDelete = (index: number) => {
 		toast({
 			title: "Asset Deleted",
@@ -224,7 +222,7 @@ export function RecordsTable({
 
 	return (
 		<>
-			<div className="rounded-md border overflow-hidden h-full flex flex-col">
+			<div className="rounded-md border overflow-hidden flex flex-col">
 				<div className="overflow-auto flex-1">
 					<Table>
 						<TableHeader className="sticky top-0 bg-background z-10">

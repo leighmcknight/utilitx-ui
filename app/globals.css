@@ -405,3 +405,10 @@ body {
 .legend-header {
 	padding-bottom: 20px;
 }
+
+.bottom-padding {
+	padding-bottom: 30px;
+}
+.bottom-padding-small {
+	padding-bottom: 10px;
+}
