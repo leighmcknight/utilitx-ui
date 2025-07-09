@@ -226,9 +226,7 @@ export function UploadForm() {
 	const [activeTab, setActiveTab] = useState("file");
 	const [validationError, setValidationError] = useState<string | null>(null);
 	const router = useRouter();
-	// const { toast } = useToast()
 	const { addRecords, setRecords } = useAppStore();
-	// const { records } = useAppStore()
 
 	const [results, setResults] = useState<any[]>([]);
 	const [regionName, setRegionName] = useState("");
@@ -276,11 +274,9 @@ export function UploadForm() {
 
 			return {
 				geometry: {
-					spatialReference: {
-						wkid: "1234",
-					},
 					x: data.metadata.georeference.lon,
 					y: data.metadata.georeference.lat,
+					spatialReference: { wkid: 4326 },
 				},
 				attributes: {
 					Latitude: data.metadata.georeference.lat,
@@ -300,8 +296,8 @@ export function UploadForm() {
 					GeorefSource:
 						data.metadata.georeference.georeference_source,
 					TextBlob: allTextBlobs,
-					DrawingURL: "test",
-					Category: "test",
+					DrawingURL: data.file_url,
+					Category: data.file_tag,
 				},
 			};
 		});
@@ -309,15 +305,22 @@ export function UploadForm() {
 		console.log("gisJSON: ", gisJSON);
 		console.log("gisJSON: ", JSON.stringify(gisJSON));
 
-		const GISCall = await fetch(
+		const res = await fetch(
 			"https://services7.arcgis.com/85E8yrjEGbCKVQjw/ArcGIS/rest/services/utilitx_test/FeatureServer/0/applyEdits",
 			{
 				method: "POST",
-				body: gisJSON,
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					f: "json",
+					adds: JSON.stringify(gisJSON),
+				}),
 			}
 		);
 
-		console.log("GISCall: ", GISCall);
+		const result = await res.json();
+		console.log("ArcGIS API result:", result);
 	};
 
 	const handleFilesSelected = (selectedFiles: UploadedWithOption[]) => {
@@ -338,10 +341,8 @@ export function UploadForm() {
 	// }
 
 	const handleViewOnMap = (resultId: string) => {
-		// Find the result and scroll to the map
 		const result = results.find((r) => r.id === resultId);
 		if (result && mapRef.current) {
-			// Scroll to the map
 			mapRef.current.scrollIntoView({ behavior: "smooth" });
 		}
 	};
@@ -392,8 +393,10 @@ export function UploadForm() {
 		form.append("region", regionName);
 		form.append("bbox", JSON.stringify(boundingBox));
 		Array.from(files).forEach((file) => form.append("files", file.file));
+		Array.from(files).forEach((file) =>
+			form.append("tags", file.option ?? "")
+		);
 
-		// When storing files
 		const filesWithPreview = await Promise.all(
 			files.map(async (f) => ({
 				name: f.file.name,
@@ -404,6 +407,7 @@ export function UploadForm() {
 
 		sessionStorage.setItem("files", JSON.stringify(filesWithPreview));
 
+		// // TODO: REMOVE LATER
 		// handleGCPResponseToArcGIS(stubbedResponseBody);
 		try {
 			setLoading(true);
@@ -433,6 +437,10 @@ export function UploadForm() {
 			}
 
 			sessionStorage.setItem("records", JSON.stringify(recordsToAdd));
+			// TODO: REMOVE LATER
+			// sessionStorage.setItem("records", JSON.stringify(stubbedResponseBody));
+
+			document.body.style.overflow = "auto";
 			router.push("/records");
 		} catch (err: any) {
 			console.error("🚨 Fetch error:", err);

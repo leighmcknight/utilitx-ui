@@ -15,7 +15,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UploadedWithOption, useAppStore, type AssetRecord } from "@/lib/store";
+import { type AssetRecord } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ArcGisMap from "./arc-gis-map";
@@ -34,7 +34,7 @@ export function RecordsView() {
 
 	// const { records } = useAppStore()
 
-	const [ingestedData, setIngestedData] = useState(null);
+	const [ingestedData, setIngestedData] = useState<AssetRecord[]>([]);
 
 	useEffect(() => {
 		const stored = sessionStorage.getItem("records");
@@ -256,89 +256,168 @@ export function RecordsView() {
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<Card className="record-count">
-					<CardContent className="p-6 flex flex-col items-center">
-						<div className="text-4xl font-bold">{totalRecords}</div>
-						<div className="text-sm text-gray-500">
-							Total Records
-						</div>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardContent className="p-6 flex flex-col items-center">
-						<p className="text-xl font-bold gap-2">
-							Colour coding is used to display the primary asset
-							as built was submitted for.
-						</p>
-						<hr />
-						<div className="md:grid-cols-3 grid content-start gap-2">
-							<div className="flex items-center mb-4">
-								<div className="flex items-center justify-center w-8 h-8 rounded-full red-dot mr-2"></div>
-								<p className="text-sm">
-									Electric Power Lines, Cables, Conduit and
-									Lighting Cables
-								</p>
-							</div>
-							<div className="flex items-center mb-4">
-								<div className="flex items-center justify-center w-8 h-8 rounded-full yellow-dot mr-2"></div>
-								<p className="text-sm">
-									Gas, Oil, Steam, Petroleum or Gaseous
-									Materials
-								</p>
-							</div>
-							<div className="flex items-center mb-4">
-								<div className="flex items-center justify-center w-8 h-8 rounded-full orange-dot mr-2"></div>
-								<p className="text-sm">
-									Communications, Alarm or Signal Lines,
-									Cables or Conduit
-								</p>
-							</div>
-							<div className="flex items-center mb-4">
-								<div className="flex items-center justify-center w-8 h-8 rounded-full blue-dot mr-2"></div>
-								<p className="text-sm">Potable Water</p>
-							</div>
-							<div className="flex items-center mb-4">
-								<div className="flex items-center justify-center w-8 h-8 rounded-full purple-dot mr-2"></div>
-								<p className="text-sm">
-									Reclaimed Water, Irrigation and Slurry Lines
-								</p>
-							</div>
-							<div className="flex items-center mb-4">
-								<div className="flex items-center justify-center w-8 h-8 rounded-full green-dot mr-2"></div>
-								<p className="text-sm">Sewer and Drain Lines</p>
-							</div>
-							<div className="flex items-center mb-4">
-								<div className="flex items-center justify-center w-8 h-8 rounded-full pink-dot mr-2"></div>
-								<p className="text-sm">
-									Temporary Survey Markings
-								</p>
-							</div>
-							<div className="flex items-center mb-4">
-								<div className="flex items-center justify-center w-8 h-8 rounded-full white-dot mr-2"></div>
-								<p className="text-sm">Proposed Excavation</p>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-
 			<div className="h-[calc(100vh-400px)] min-h-[500px]">
 				{view === "list" ? (
-					<RecordsTable
-						records={filteredRecords}
-						selectedRecord={selectedRecord}
-						onSelectRecord={handleRecordSelect}
-					/>
+					<>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<Card className="record-count">
+								<CardContent className="p-6 flex flex-col items-center">
+									<div className="text-4xl font-bold">
+										{totalRecords}
+									</div>
+									<div className="text-sm text-gray-500">
+										Total Records
+									</div>
+								</CardContent>
+							</Card>
+							<Card>
+								<CardContent className="p-6 flex flex-col items-center">
+									<p className="text-xl font-bold gap-2">
+										Colour coding is used to display the
+										primary asset as built was submitted
+										for.
+									</p>
+									<hr />
+									<div className="md:grid-cols-3 grid content-start gap-2">
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full red-dot mr-2"></div>
+											<p className="text-sm">
+												Electric Power Lines, Cables,
+												Conduit and Lighting Cables
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full yellow-dot mr-2"></div>
+											<p className="text-sm">
+												Gas, Oil, Steam, Petroleum or
+												Gaseous Materials
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full orange-dot mr-2"></div>
+											<p className="text-sm">
+												Communications, Alarm or Signal
+												Lines, Cables or Conduit
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full blue-dot mr-2"></div>
+											<p className="text-sm">
+												Potable Water
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full purple-dot mr-2"></div>
+											<p className="text-sm">
+												Reclaimed Water, Irrigation and
+												Slurry Lines
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full green-dot mr-2"></div>
+											<p className="text-sm">
+												Sewer and Drain Lines
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full pink-dot mr-2"></div>
+											<p className="text-sm">
+												Temporary Survey Markings
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full white-dot mr-2"></div>
+											<p className="text-sm">
+												Proposed Excavation
+											</p>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+						</div>
+						<RecordsTable
+							records={filteredRecords}
+							selectedRecord={selectedRecord}
+							onSelectRecord={handleRecordSelect}
+						/>
+					</>
 				) : (
-					<ArcGisMap gcpResponse={ingestedData}></ArcGisMap>
+					<>
+						<div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+							<Card>
+								<CardContent className="p-6 flex flex-col items-center">
+									<p className="text-xl font-bold legend-header">
+										Colour coding is used to display the
+										primary asset as built was submitted
+										for.
+									</p>
+									<hr />
+									<div className="md:grid-cols-4 grid content-start gap-2">
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full red-dot mr-2"></div>
+											<p className="text-sm">
+												Electric Power Lines, Cables,
+												Conduit and Lighting Cables
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full yellow-dot mr-2"></div>
+											<p className="text-sm">
+												Gas, Oil, Steam, Petroleum or
+												Gaseous Materials
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full orange-dot mr-2"></div>
+											<p className="text-sm">
+												Communications, Alarm or Signal
+												Lines, Cables or Conduit
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full blue-dot mr-2"></div>
+											<p className="text-sm">
+												Potable Water
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full purple-dot mr-2"></div>
+											<p className="text-sm">
+												Reclaimed Water, Irrigation and
+												Slurry Lines
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full green-dot mr-2"></div>
+											<p className="text-sm">
+												Sewer and Drain Lines
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full pink-dot mr-2"></div>
+											<p className="text-sm">
+												Temporary Survey Markings
+											</p>
+										</div>
+										<div className="flex items-center mb-4">
+											<div className="flex items-center justify-center w-8 h-8 rounded-full white-dot mr-2"></div>
+											<p className="text-sm">
+												Proposed Excavation
+											</p>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+						</div>
+						<ArcGisMap gcpResponse={ingestedData} />
+					</>
 
 					// <RecordsMap
-					//   records={filteredRecords}
-					//   selectedRecord={selectedRecord}
-					//   onSelectRecord={handleRecordSelect}
-					//   onRecordUpdate={handleRecordUpdate}
-					//   getRecordId={getRecordId}
+					// 	records={filteredRecords}
+					// 	selectedRecord={selectedRecord}
+					// 	onSelectRecord={handleRecordSelect}
+					// 	onRecordUpdate={handleRecordUpdate}
+					// 	getRecordId={getRecordId}
 					// />
 				)}
 			</div>
