@@ -41,7 +41,7 @@ export interface BoundingBox {
 
 export interface AssetRecord {
 	record_id: string;
-	geometry: { type: string; coordinates: number[] };
+	geometry: { type: "Point"; coordinates: number[] };
 	tiles: { [key: string]: { text_blob: string } };
 	georeference: Georeference;
 	bounding_box: BoundingBox;
@@ -57,6 +57,8 @@ export interface AssetRecord {
 	text_blob_summary?: string;
 	error: null | string;
 	selected_option: string;
+	file_url: string;
+	file_tag: string;
 }
 
 interface AppState {

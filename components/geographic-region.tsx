@@ -1,196 +1,215 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { MapPin, AlertCircle } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { loadGoogleMapsApi } from "@/lib/load-google-maps"
-import { DynamicBoundingBoxMap } from "./dynamic-map-components"
-import { ClientOnly } from "./client-only"
-import { Loader2, AlertTriangle } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { loadGoogleMapsApi } from "@/lib/load-google-maps";
+import { DynamicBoundingBoxMap } from "./dynamic-map-components";
+import { ClientOnly } from "./client-only";
+import { Loader2, AlertTriangle } from "lucide-react";
 // import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-
 interface GeographicRegionProps {
-  onRegionSelected: (region: string, boundingBox: any) => void
-  onRegionNameChange?: (region: string) => void
-  markers?: Array<{
-    id: string
-    lat: number
-    lng: number
-    title: string
-  }>
+	onRegionSelected: (region: string, boundingBox: any) => void;
+	onRegionNameChange?: (region: string) => void;
+	markers?: Array<{
+		id: string;
+		lat: number;
+		lng: number;
+		title: string;
+	}>;
 }
 
-export function GeographicRegion({ onRegionSelected, onRegionNameChange, markers = [] }: GeographicRegionProps) {
-  const [regionName, setRegionName] = useState("")
-  const [boundingBox, setBoundingBox] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [validationError, setValidationError] = useState<string | null>(null)
-  const [bboxTouched, setBboxTouched] = useState(false);
-  
-  // setRegionName(regionName);
+export function GeographicRegion({
+	onRegionSelected,
+	onRegionNameChange,
+	markers = [],
+}: GeographicRegionProps) {
+	const [regionName, setRegionName] = useState("");
+	const [boundingBox, setBoundingBox] = useState<any>(null);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState("");
+	const [validationError, setValidationError] = useState<string | null>(null);
+	const [bboxTouched, setBboxTouched] = useState(false);
 
-  const handleGetBoundingBox = async () => {
-    if (!regionName) return
+	// setRegionName(regionName);
 
-    setLoading(true)
-    setError("")
+	const handleGetBoundingBox = async () => {
+		if (!regionName) return;
 
-    try {
-      // Load Google Maps API using our centralized loader
-      await loadGoogleMapsApi()
+		setLoading(true);
+		setError("");
 
-      if (typeof window === "undefined" || !window.google) {
-        setError("Google Maps API not available")
-        setLoading(false)
-        return
-      }
+		try {
+			// Load Google Maps API using our centralized loader
+			await loadGoogleMapsApi();
 
-      // Use Google Maps Geocoding API
-      const geocoder = new window.google.maps.Geocoder()
+			if (typeof window === "undefined" || !window.google) {
+				setError("Google Maps API not available");
+				setLoading(false);
+				return;
+			}
 
-      geocoder.geocode({ address: regionName }, (results, status) => {
-        if (status === "OK" && results && results.length > 0) {
-          const result = results[0]
-          const viewport = result.geometry.viewport
+			// Use Google Maps Geocoding API
+			const geocoder = new window.google.maps.Geocoder();
 
-          // Extract bounding box from viewport
-          const newBoundingBox = {
-            north: viewport.getNorthEast().lat(),
-            east: viewport.getNorthEast().lng(),
-            south: viewport.getSouthWest().lat(),
-            west: viewport.getSouthWest().lng(),
-          }
+			geocoder.geocode({ address: regionName }, (results, status) => {
+				if (status === "OK" && results && results.length > 0) {
+					const result = results[0];
+					const viewport = result.geometry.viewport;
 
-          setBoundingBox(newBoundingBox)
-          onRegionSelected(regionName, newBoundingBox)
-          setLoading(false)
-        } else {
-          setError(`Could not find region: ${status}`)
-          setLoading(false)
-        }
-      })
-    } catch (err) {
-      setError("Error loading Google Maps API")
-      setLoading(false)
-      console.error(err)
-    }
+					// Extract bounding box from viewport
+					const newBoundingBox = {
+						north: viewport.getNorthEast().lat(),
+						east: viewport.getNorthEast().lng(),
+						south: viewport.getSouthWest().lat(),
+						west: viewport.getSouthWest().lng(),
+					};
 
-  }
+					setBoundingBox(newBoundingBox);
+					onRegionSelected(regionName, newBoundingBox);
+					setLoading(false);
+				} else {
+					setError(`Could not find region: ${status}`);
+					setLoading(false);
+				}
+			});
+		} catch (err) {
+			setError("Error loading Google Maps API");
+			setLoading(false);
+			console.error(err);
+		}
+	};
 
-  // For demo purposes, let's add a function to use a predefined region
-  const usePredefinedRegion = () => {
-    const predefinedRegion = "Durham Region, ON"
-    const predefinedBoundingBox = {
-      north: 44.5167599,
-      east: -78.324079,
-      south: 43.520641,
-      west: -79.327997,
-    }
+	// For demo purposes, let's add a function to use a predefined region
+	const usePredefinedRegion = () => {
+		const predefinedRegion = "Durham Region, ON";
+		const predefinedBoundingBox = {
+			north: 44.5167599,
+			east: -78.324079,
+			south: 43.520641,
+			west: -79.327997,
+		};
 
-    setRegionName(predefinedRegion)
-    setBoundingBox(predefinedBoundingBox)
-    onRegionSelected(predefinedRegion, predefinedBoundingBox)
-  }
+		setRegionName(predefinedRegion);
+		setBoundingBox(predefinedBoundingBox);
+		onRegionSelected(predefinedRegion, predefinedBoundingBox);
+	};
 
-  return (
-    <div className="mb-8">
-      <div className="flex items-center mb-4">
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-200 text-white mr-2">
-          <span className="text-sm font-bold">1</span>
-        </div>
-        <h2 className="text-xl font-semibold">Define Geographic Region</h2>
-      </div>
+	return (
+		<div className="mb-8">
+			<div className="flex items-center mb-4">
+				<div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-200 text-white mr-2">
+					<span className="text-sm font-bold">1</span>
+				</div>
+				<h2 className="text-xl font-semibold">
+					Define Geographic Region
+				</h2>
+			</div>
 
-      <p className="text-gray-600 mb-4">
-        Enter a region name (e.g., "Durham Region, ON"), and select "Get Bounding Box" to get its bounding box coordinates
-      </p>
+			<p className="text-gray-600 mb-4">
+				Enter a region name (City/Town, Province), and select "Get
+				Bounding Box" to get its bounding box coordinates
+			</p>
 
-      <div className="mb-4">
-        <label htmlFor="region-name" className="block text-sm font-medium text-gray-700 mb-1">
-          Region Name
-        </label>
-        <div className="flex gap-4">
-          <Input
-            id="region-name"
-            value={regionName}
-            onChange={(e) => 
-            {
-              const newValue = e.target.value
-              setRegionName(newValue)
-              if (onRegionNameChange) onRegionNameChange(newValue)
-            }
-              
-            }
-            placeholder="e.g., Durham Region, ON"
-            className="flex-1"
-          />
-          <Button
-            style={{ backgroundColor: "#3b82f6", color: "white" }}
-            onClick={handleGetBoundingBox}
-            disabled={!regionName || loading}
-            className="bg-primary-200 hover:bg-primary-300"
-          >
-            {loading ? (
-              <span className="flex items-center">
-                <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Loading...
-              </span>
-            ) : (
-              <>
-                <MapPin className="mr-2 h-4 w-4" />
-                Get Bounding Box
-              </>
-            )}
-          </Button>
-        </div>
-        <div className="mt-2">
-          <Button variant="outline" onClick={usePredefinedRegion} className="text-sm">
-            Use Demo Region (Durham Region, ON)
-          </Button>
-        </div>
-      </div>
+			<div className="mb-4">
+				<label
+					htmlFor="region-name"
+					className="block text-sm font-medium text-gray-700 mb-1">
+					Region Name
+				</label>
+				<div className="flex gap-4">
+					<Input
+						id="region-name"
+						value={regionName}
+						onChange={(e) => {
+							const newValue = e.target.value;
+							setRegionName(newValue);
+							if (onRegionNameChange)
+								onRegionNameChange(newValue);
+						}}
+						placeholder="City/Town, Province"
+						className="flex-1"
+					/>
+					<Button
+						style={{ backgroundColor: "#3b82f6", color: "white" }}
+						onClick={handleGetBoundingBox}
+						disabled={!regionName || loading}
+						className="bg-primary-200 hover:bg-primary-300">
+						{loading ? (
+							<span className="flex items-center">
+								<svg
+									className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24">
+									<circle
+										className="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										strokeWidth="4"></circle>
+									<path
+										className="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								</svg>
+								Loading...
+							</span>
+						) : (
+							<>
+								<MapPin className="mr-2 h-4 w-4" />
+								Get Bounding Box
+							</>
+						)}
+					</Button>
+				</div>
+				<div className="mt-2">
+					<Button
+						variant="outline"
+						onClick={usePredefinedRegion}
+						className="text-sm">
+						Use Demo Region (Durham Region, ON)
+					</Button>
+				</div>
+			</div>
 
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      
-      {boundingBox && (
-        <Card className="bg-gray-50">
-          <CardContent className="p-4">
-            <div className="text-sm text-gray-500 mb-2">
-              <span className="flex items-center">
-                <MapPin className="h-4 w-4 mr-1" />
-                Bounding box for {regionName}
-              </span>
-            </div>
-            <div className="h-[400px] border border-gray-300 rounded-md overflow-hidden">
-              <ClientOnly fallback={<div className="flex items-center justify-center h-full">Loading map...</div>}>
-                <DynamicBoundingBoxMap boundingBox={boundingBox} markers={markers} />
-              </ClientOnly>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  )
+			{error && (
+				<Alert variant="destructive" className="mb-4">
+					<AlertCircle className="h-4 w-4" />
+					<AlertDescription>{error}</AlertDescription>
+				</Alert>
+			)}
+
+			{boundingBox && (
+				<Card className="bg-gray-50">
+					<CardContent className="p-4">
+						<div className="text-sm text-gray-500 mb-2">
+							<span className="flex items-center">
+								<MapPin className="h-4 w-4 mr-1" />
+								Bounding box for {regionName}
+							</span>
+						</div>
+						<div className="h-[400px] border border-gray-300 rounded-md overflow-hidden">
+							<ClientOnly
+								fallback={
+									<div className="flex items-center justify-center h-full">
+										Loading map...
+									</div>
+								}>
+								<DynamicBoundingBoxMap
+									boundingBox={boundingBox}
+									markers={markers}
+								/>
+							</ClientOnly>
+						</div>
+					</CardContent>
+				</Card>
+			)}
+		</div>
+	);
 }

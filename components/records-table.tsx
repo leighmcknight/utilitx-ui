@@ -1,12 +1,25 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
-import { getScoreColor } from "@/lib/utils"
-import { FileText, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react"
+import { useState } from "react";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { getScoreColor } from "@/lib/utils";
+import { FileText, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
 // Lucide commented: MoreHorizontal, Eye, Edit, Trash2
 // import {
 //   DropdownMenu,
@@ -16,404 +29,703 @@ import { FileText, ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react"
 //   DropdownMenuSeparator,
 //   DropdownMenuTrigger,
 // } from "@/components/ui/dropdown-menu"
-import { useToast } from "@/hooks/use-toast"
-import type { AssetRecord } from "@/lib/store"
+import { useToast } from "@/hooks/use-toast";
+import type { AssetRecord } from "@/lib/store";
 
 interface RecordsTableProps {
-  records: AssetRecord[]
-  selectedRecord: string | null
-  onSelectRecord: (id: string) => void
+	records: AssetRecord[];
+	selectedRecord: string | null;
+	onSelectRecord: (id: string) => void;
 }
 
-type SortField = "lat" | "lon" | "conf" | "source" | "trust_score" | "fallback_used"
-type SortDirection = "asc" | "desc"
+type SortField =
+	| "lat"
+	| "lon"
+	| "conf"
+	| "source"
+	| "trust_score"
+	| "fallback_used";
+type SortDirection = "asc" | "desc";
 
-export function RecordsTable({ records, selectedRecord, onSelectRecord }: RecordsTableProps) {
-  const [sortField, setSortField] = useState<SortField>("lat")
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
-  const [detailRecord, setDetailRecord] = useState<AssetRecord | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+export function RecordsTable({
+	records,
+	selectedRecord,
+	onSelectRecord,
+}: RecordsTableProps) {
+	const [sortField, setSortField] = useState<SortField>("lat");
+	const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+	const [detailRecord, setDetailRecord] = useState<AssetRecord | null>(null);
+	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const { toast } = useToast()
+	const { toast } = useToast();
 
-  const optionToDot = {
-    "Electric Power Lines, Cables, Conduit and Lighting Cables": { color: "red-dot", label: "Electric Power Lines, Cables, Conduit and Lighting Cables" },
-    "Gas, Oil, Steam, Petroleum or Gaseous Materials": { color: "yellow-dot", label: "Gas, Oil, Steam, Petroleum or Gaseous Materials" },
-    "Communications, Alarm or Signal Lines, Cables or Conduit": { color: "orange-dot", label: "Communications, Alarm or Signal Lines, Cables or Conduit" },
-    "Potable Water": { color: "blue-dot", label: "Potable Water" },
-    "Reclaimed Water, Irrigation and Slurry Lines": { color: "purple-dot", label: "Reclaimed Water, Irrigation and Slurry Lines" },
-    "Sewer and Drain Lines": { color: "green-dot", label: "Sewer and Drain Lines" },
-    "Temporary Survey Markings": { color: "pink-dot", label: "Temporary Survey Markings" },
-    "Proposed Excavation": { color: "white-dot", label: "Proposed Excavation" },
-  };
+	const optionToDot = {
+		"Electric Power Lines, Cables, Conduit and Lighting Cables": {
+			color: "red-dot",
+			label: "Electric Power Lines, Cables, Conduit and Lighting Cables",
+		},
+		"Gas, Oil, Steam, Petroleum or Gaseous Materials": {
+			color: "yellow-dot",
+			label: "Gas, Oil, Steam, Petroleum or Gaseous Materials",
+		},
+		"Communications, Alarm or Signal Lines, Cables or Conduit": {
+			color: "orange-dot",
+			label: "Communications, Alarm or Signal Lines, Cables or Conduit",
+		},
+		"Potable Water": { color: "blue-dot", label: "Potable Water" },
+		"Reclaimed Water, Irrigation and Slurry Lines": {
+			color: "purple-dot",
+			label: "Reclaimed Water, Irrigation and Slurry Lines",
+		},
+		"Sewer and Drain Lines": {
+			color: "green-dot",
+			label: "Sewer and Drain Lines",
+		},
+		"Temporary Survey Markings": {
+			color: "pink-dot",
+			label: "Temporary Survey Markings",
+		},
+		"Proposed Excavation": {
+			color: "white-dot",
+			label: "Proposed Excavation",
+		},
+	};
 
-  const handleSort = (field: SortField) => {
-    if (field === sortField) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
-    } else {
-      setSortField(field)
-      setSortDirection("asc")
-    }
-  }
+	const handleSort = (field: SortField) => {
+		if (field === sortField) {
+			setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+		} else {
+			setSortField(field);
+			setSortDirection("asc");
+		}
+	};
 
-  const sortedRecords = [...records].sort((a, b) => {
-    let comparison = 0
-    // Ensure metadata.georeference exists before accessing properties
-    if (!a?.metadata?.georeference || !b?.metadata?.georeference) return 0
+	const sortedRecords = [...records].sort((a, b) => {
+		let comparison = 0;
+		// Ensure metadata.georeference exists before accessing properties
+		if (!a?.metadata?.georeference || !b?.metadata?.georeference) return 0;
 
-    switch (sortField) {
-      case "lat":
-        comparison = a?.metadata?.georeference.lat - b?.metadata?.georeference.lat
-        break
-      case "lon":
-        comparison = a?.metadata?.georeference.lon - b?.metadata?.georeference.lon
-        break
-      case "conf":
-        comparison = a?.metadata?.georeference.conf - b?.metadata?.georeference.conf
-        break
-      case "source":
-        comparison = (a?.metadata?.georeference.source || "").localeCompare(b?.metadata?.georeference.source || "")
-        break
-      case "trust_score":
-        comparison = a?.metadata?.georeference.trust_score - b?.metadata?.georeference.trust_score
-        break
-      case "fallback_used":
-        comparison = (a?.metadata?.georeference.fallback_used ? 1 : 0) - (b?.metadata?.georeference.fallback_used ? 1 : 0)
-        break
-    }
-    return sortDirection === "asc" ? comparison : -comparison
-  })
+		switch (sortField) {
+			case "lat":
+				comparison =
+					a?.metadata?.georeference.lat -
+					b?.metadata?.georeference.lat;
+				break;
+			case "lon":
+				comparison =
+					a?.metadata?.georeference.lon -
+					b?.metadata?.georeference.lon;
+				break;
+			case "conf":
+				comparison =
+					a?.metadata?.georeference.conf -
+					b?.metadata?.georeference.conf;
+				break;
+			case "source":
+				comparison = (
+					a?.metadata?.georeference.source || ""
+				).localeCompare(b?.metadata?.georeference.source || "");
+				break;
+			case "trust_score":
+				comparison =
+					a?.metadata?.georeference.trust_score -
+					b?.metadata?.georeference.trust_score;
+				break;
+			case "fallback_used":
+				comparison =
+					(a?.metadata?.georeference.fallback_used ? 1 : 0) -
+					(b?.metadata?.georeference.fallback_used ? 1 : 0);
+				break;
+		}
+		return sortDirection === "asc" ? comparison : -comparison;
+	});
 
-  const handleOpenPreview = (index: number) => {
-    const filesRaw = sessionStorage.getItem("files")
-    if (!filesRaw) {
-      alert("No file preview found in sessionStorage.")
-      return
-    }
+	const handleOpenPreview = (index: number) => {
+		if (!records) {
+			alert("No file preview found in sessionStorage.");
+			return;
+		}
 
-    try {
-      const files = JSON.parse(filesRaw)
-      const file = files[index]
+		try {
+			const files = records;
+			const file = files[index];
 
-      if (!file || !file.previewUrl) {
-        alert("No preview URL found for this file.")
-        return
-      }
+			if (!file || !file.file_url) {
+				alert("No preview URL found for this file.");
+				return;
+			}
 
-      const previewWindow = window.open()
+			const previewWindow = window.open();
 
-      if (previewWindow) {
-        previewWindow.document.write(`
-          <html>
-            <head><title>File Preview - ${file.name}</title></head>
-            <body style="margin:0">
-              <embed src="${file.previewUrl}" type="application/pdf" width="100%" height="100%" />
-            </body>
-          </html>
-        `)
-        previewWindow.document.close()
-      } else {
-        alert("Pop-up blocked. Please allow pop-ups.")
-      }
-    } catch (e) {
-      console.error("Error parsing sessionStorage files:", e)
-      alert("Failed to parse file preview.")
-    }
-  }
+			if (previewWindow) {
+				previewWindow.document.write(`
+					<html>
+						<head><title>File Preview - ${file.record_id}</title></head>
+						<body style="margin:0">
+						<embed src="https://docs.google.com/gview?embedded=true&url=${file.file_url}" type="application/pdf" width="100%" height="100%" />
+						</body>
+						</html>
+						`);
+				previewWindow.document.close();
+			} else {
+				alert("Pop-up blocked. Please allow pop-ups.");
+			}
+		} catch (e) {
+			console.error("Error parsing sessionStorage files:", e);
+			alert("Failed to parse file preview.");
+		}
+	};
+	const handleDelete = (index: number) => {
+		toast({
+			title: "Asset Deleted",
+			description: `Asset at index ${index} has been deleted.`,
+		});
+	};
 
-  const handleDelete = (index: number) => {
-    toast({
-      title: "Asset Deleted",
-      description: `Asset at index ${index} has been deleted.`,
-    })
-  }
+	const handleEdit = (index: number) => {
+		toast({
+			title: "Edit Asset",
+			description: `Editing asset at index ${index}.`,
+		});
+	};
 
-  const handleEdit = (index: number) => {
-    toast({
-      title: "Edit Asset",
-      description: `Editing asset at index ${index}.`,
-    })
-  }
+	const handleView = (index: number) => {
+		toast({
+			title: "View Asset",
+			description: `Viewing asset at index ${index}.`,
+		});
+	};
 
-  const handleView = (index: number) => {
-    toast({
-      title: "View Asset",
-      description: `Viewing asset at index ${index}.`,
-    })
-  }
+	const SortIcon = ({ field }: { field: SortField }) => {
+		if (field !== sortField)
+			return <ArrowUpDown className="h-4 w-4 ml-1" />;
+		return sortDirection === "asc" ? (
+			<ChevronUp className="h-4 w-4 ml-1" />
+		) : (
+			<ChevronDown className="h-4 w-4 ml-1" />
+		);
+	};
 
-  const SortIcon = ({ field }: { field: SortField }) => {
-    if (field !== sortField) return <ArrowUpDown className="h-4 w-4 ml-1" />
-    return sortDirection === "asc" ? <ChevronUp className="h-4 w-4 ml-1" /> : <ChevronDown className="h-4 w-4 ml-1" />
-  }
+	// Function to get a unique ID for each record (since the new schema doesn't have an ID field)
+	const getRecordId = (record: AssetRecord, index: number) => {
+		if (!record?.metadata?.georeference) return `record-${index}`;
+		return `${record?.metadata?.georeference.lat}-${record?.metadata?.georeference.lon}-${index}`;
+	};
 
-  // Function to get a unique ID for each record (since the new schema doesn't have an ID field)
-  const getRecordId = (record: AssetRecord, index: number) => {
-    if (!record?.metadata?.georeference) return `record-${index}`
-    return `${record?.metadata?.georeference.lat}-${record?.metadata?.georeference.lon}-${index}`
-  }
+	// Function to truncate text
+	const truncateText = (text: string | undefined, maxLength = 100) => {
+		if (!text) return "N/A";
+		return text.length > maxLength
+			? text.substring(0, maxLength) + "..."
+			: text;
+	};
 
-  // Function to truncate text
-  const truncateText = (text: string | undefined, maxLength = 100) => {
-    if (!text) return "N/A"
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text
-  }
-  
+	return (
+		<>
+			<div className="rounded-md border overflow-hidden flex flex-col">
+				<div className="overflow-auto flex-1">
+					<Table>
+						<TableHeader className="sticky top-0 bg-background z-10">
+							<TableRow>
+								<TableHead className="cursor-pointer">
+									<div className="flex items-center">
+										File Type
+									</div>
+								</TableHead>
+								<TableHead
+									className="cursor-pointer"
+									onClick={() => handleSort("lat")}>
+									<div className="flex items-center">
+										Latitude
+										<SortIcon field="lat" />
+									</div>
+								</TableHead>
+								<TableHead
+									className="cursor-pointer"
+									onClick={() => handleSort("lon")}>
+									<div className="flex items-center">
+										Longitude
+										<SortIcon field="lon" />
+									</div>
+								</TableHead>
+								<TableHead
+									className="cursor-pointer"
+									onClick={() => handleSort("conf")}>
+									<div className="flex items-center">
+										Confidence
+										<SortIcon field="conf" />
+									</div>
+								</TableHead>
+								<TableHead
+									className="cursor-pointer"
+									onClick={() => handleSort("source")}>
+									<div className="flex items-center">
+										Source
+										<SortIcon field="source" />
+									</div>
+								</TableHead>
+								<TableHead>Intersection</TableHead>
+								<TableHead
+									className="cursor-pointer"
+									onClick={() => handleSort("trust_score")}>
+									<div className="flex items-center">
+										Trust Score
+										<SortIcon field="trust_score" />
+									</div>
+								</TableHead>
+								<TableHead
+									className="cursor-pointer"
+									onClick={() => handleSort("fallback_used")}>
+									<div className="flex items-center">
+										Fallback Used
+										<SortIcon field="fallback_used" />
+									</div>
+								</TableHead>
+								<TableHead>Summary</TableHead>
+								<TableHead className="text-right">
+									Actions
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{sortedRecords.length === 0 ? (
+								<TableRow>
+									<TableCell
+										colSpan={9}
+										className="text-center py-8 text-gray-500">
+										No records found
+									</TableCell>
+								</TableRow>
+							) : (
+								sortedRecords.map((record, index) => {
+									const recordId = getRecordId(record, index);
+									if (!record?.metadata?.georeference)
+										return null;
 
-  return (
-    <>
-      <div className="rounded-md border overflow-hidden h-full flex flex-col">
-        <div className="overflow-auto flex-1">
-          <Table>
-            <TableHeader className="sticky top-0 bg-background z-10">
-              <TableRow>
-                <TableHead className="cursor-pointer">
-                  <div className="flex items-center">
-                    File Type
-                  </div>
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("lat")}>
-                  <div className="flex items-center">
-                    Latitude
-                    <SortIcon field="lat" />
-                  </div>
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("lon")}>
-                  <div className="flex items-center">
-                    Longitude
-                    <SortIcon field="lon" />
-                  </div>
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("conf")}>
-                  <div className="flex items-center">
-                    Confidence
-                    <SortIcon field="conf" />
-                  </div>
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("source")}>
-                  <div className="flex items-center">
-                    Source
-                    <SortIcon field="source" />
-                  </div>
-                </TableHead>
-                <TableHead>Intersection</TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("trust_score")}>
-                  <div className="flex items-center">
-                    Trust Score
-                    <SortIcon field="trust_score" />
-                  </div>
-                </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort("fallback_used")}>
-                  <div className="flex items-center">
-                    Fallback Used
-                    <SortIcon field="fallback_used" />
-                  </div>
-                </TableHead>
-                <TableHead>Summary</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedRecords.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-gray-500">
-                    No records found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                sortedRecords.map((record, index) => {
-                  const recordId = getRecordId(record, index)
-                  if (!record?.metadata?.georeference) return null
+									return (
+										<TableRow
+											key={recordId}
+											className={`cursor-pointer ${
+												selectedRecord === recordId
+													? "bg-muted/50"
+													: ""
+											}`}
+											onClick={() =>
+												onSelectRecord(recordId)
+											}>
+											<TableCell>
+												{(() => {
+													const option =
+														record?.selected_option ||
+														"N/A";
 
-                  return (
-                    <TableRow
-                      key={recordId}
-                      className={`cursor-pointer ${selectedRecord === recordId ? "bg-muted/50" : ""}`}
-                      onClick={() => onSelectRecord(recordId)}
-                    >
-                      <TableCell>
-                        {(() => {
-                          const option = record?.selected_option || "N/A";
+													if (option in optionToDot) {
+														const dot =
+															optionToDot[
+																option as keyof typeof optionToDot
+															];
+														return (
+															<div className="flex items-center">
+																<div
+																	className={`w-6 h-6 rounded-full ${dot.color} mr-2`}
+																/>
+															</div>
+														);
+													}
+												})()}
+											</TableCell>
+											<TableCell>
+												{record?.metadata?.georeference.lat.toFixed(
+													6
+												) || "N/A"}
+											</TableCell>
+											<TableCell>
+												{record?.metadata?.georeference.lon.toFixed(
+													6
+												) || "N/A"}
+											</TableCell>
+											<TableCell>
+												<div className="badge-align">
+													<Badge
+														variant="outline"
+														className={getScoreColor(
+															Math.round(
+																record?.metadata
+																	?.georeference
+																	.conf * 100
+															)
+														)}>
+														{(
+															record?.metadata
+																?.georeference
+																.conf * 100
+														).toFixed(0)}
+														%
+													</Badge>
+												</div>
+											</TableCell>
+											<TableCell>
+												{record?.metadata?.georeference
+													.source || "N/A"}
+											</TableCell>
+											<TableCell>
+												{Array.isArray(
+													record?.metadata
+														?.georeference
+														.intersection
+												)
+													? record?.metadata?.georeference.intersection
+															.map(
+																(item: any) =>
+																	item
+															)
+															.join(", ")
+													: record?.metadata
+															?.georeference
+															.intersection ||
+													  "N/A"}
+											</TableCell>
+											<TableCell>
+												<Badge
+													variant="outline"
+													className={getScoreColor(
+														Math.round(
+															record?.metadata
+																?.georeference
+																.trust_score *
+																100
+														)
+													)}>
+													{(
+														record?.metadata
+															?.georeference
+															.trust_score * 100
+													).toFixed(0)}
+													%
+												</Badge>
+											</TableCell>
+											<TableCell>
+												{record?.metadata?.georeference
+													.fallback_used
+													? "Yes"
+													: "No"}
+											</TableCell>
+											<TableCell className="max-w-xs">
+												<div className="truncate">
+													{truncateText(
+														record.text_blob_summary,
+														50
+													)}
+												</div>
+											</TableCell>
+											<TableCell className="text-right">
+												<Dialog>
+													<DialogTrigger
+														asChild
+														onClick={(e) =>
+															e.stopPropagation()
+														}>
+														<Button
+															variant="ghost"
+															size="icon"
+															onClick={() =>
+																setDetailRecord(
+																	record
+																)
+															}>
+															<FileText className="h-4 w-4" />
+															<span className="sr-only">
+																View Details
+															</span>
+														</Button>
+													</DialogTrigger>
+													<DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+														<DialogHeader className="grid grid-cols-2 gap-2 mt-2">
+															<DialogTitle className="preview-header text-3xl">
+																Asset Details
+															</DialogTitle>
+															<Button
+																className="preview-file-button"
+																onClick={(
+																	e
+																) => {
+																	e.stopPropagation();
+																	handleOpenPreview(
+																		index
+																	);
+																}}>
+																Preview File
+															</Button>
+														</DialogHeader>
+														{detailRecord &&
+															detailRecord.selected_option &&
+															(() => {
+																const option =
+																	detailRecord.selected_option ||
+																	"N/A";
+																if (
+																	option in
+																	optionToDot
+																) {
+																	const dot =
+																		optionToDot[
+																			option as keyof typeof optionToDot
+																		];
+																	return (
+																		<div className="flex items-center space-x-6">
+																			<div
+																				className={`w-6 h-6 rounded-full ${dot.color}`}
+																			/>
+																			<div>
+																				<h3 className="text-lg font-bold">
+																					File
+																					Type
+																				</h3>
+																				<p className="text-sm whitespace-pre-line mt-2">
+																					{
+																						detailRecord.selected_option
+																					}
+																				</p>
+																			</div>
+																		</div>
+																	);
+																}
 
-                          if (option in optionToDot) {
-                            const dot = optionToDot[option as keyof typeof optionToDot];
-                            return (
-                              <div className="flex items-center">
-                                <div className={`w-6 h-6 rounded-full ${dot.color} mr-2`} />
-                              </div>
-                            );
-                          }
-                        })()}
-                      </TableCell>
-                      <TableCell>{record?.metadata?.georeference.lat.toFixed(6)|| "N/A"}</TableCell>
-                      <TableCell>{record?.metadata?.georeference.lon.toFixed(6)|| "N/A"}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getScoreColor(Math.round(record?.metadata?.georeference.conf * 100))}>
-                          {(record?.metadata?.georeference.conf * 100).toFixed(0)}%
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{record?.metadata?.georeference.source || "N/A"}</TableCell>
-                      <TableCell>
-                        {Array.isArray(record?.metadata?.georeference.intersection)
-                        ? record?.metadata?.georeference.intersection.map((item: any) => item).join(", ")
-                        : record?.metadata?.georeference.intersection || "N/A"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={getScoreColor(Math.round(record?.metadata?.georeference.trust_score * 100))}
-                        >
-                          {(record?.metadata?.georeference.trust_score * 100).toFixed(0)}%
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{record?.metadata?.georeference.fallback_used ? "Yes" : "No"}</TableCell>
-                      <TableCell className="max-w-xs">
-                        <div className="truncate">{truncateText(record.text_blob_summary, 50)}</div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Dialog>
-                          <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon" onClick={() => setDetailRecord(record)}>
-                              <FileText className="h-4 w-4" />
-                              <span className="sr-only">View Details</span>
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader className="grid grid-cols-2 gap-2 mt-2">
-                              <DialogTitle className="preview-header text-3xl">Asset Details</DialogTitle>
-                              <Button className="preview-file-button" onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleOpenPreview(index)
-                                }}>
-                                  Preview File
-                                </Button>
-                            </DialogHeader>
-                            {detailRecord && detailRecord.selected_option && (() => {
-                              const option = detailRecord.selected_option || "N/A"
-                              if (option in optionToDot) {
-                                const dot = optionToDot[option as keyof typeof optionToDot]
-                                return (
-                                  <div className="flex items-center space-x-6">
-                                    <div className={`w-6 h-6 rounded-full ${dot.color}`} />
-                                    <div>
-                                      <h3 className="text-lg font-bold">File Type</h3>
-                                      <p className="text-sm whitespace-pre-line mt-2">{detailRecord.selected_option}</p>
-                                    </div>
-                                  </div>
-                                )
-                              }
+																return null;
+															})()}
 
-                              return null
-                            })()}
+														{detailRecord &&
+															detailRecord
+																?.metadata
+																?.georeference && (
+																<div className="space-y-4">
+																	<div>
+																		<h4 className="text-lg font-bold">
+																			Georeference
+																			Data
+																		</h4>
+																		<div className="grid grid-cols-2 gap-2 mt-2">
+																			<div>
+																				<p className="text-sm font-semibold">
+																					Latitude
+																				</p>
+																				<p className="text-sm">
+																					{detailRecord?.metadata?.georeference.lat.toFixed(
+																						6
+																					)}
+																				</p>
+																			</div>
+																			<div>
+																				<p className="text-sm font-semibold">
+																					Longitude
+																				</p>
+																				<p className="text-sm">
+																					{detailRecord?.metadata?.georeference.lon.toFixed(
+																						6
+																					)}
+																				</p>
+																			</div>
+																			<div>
+																				<p className="text-sm font-semibold">
+																					Confidence
+																				</p>
+																				<p className="text-sm">
+																					{(
+																						detailRecord
+																							?.metadata
+																							?.georeference
+																							.conf *
+																						100
+																					).toFixed(
+																						0
+																					) +
+																						"%"}
+																				</p>
+																			</div>
+																			<div>
+																				<p className="text-sm font-semibold">
+																					Source
+																				</p>
+																				<p className="text-sm">
+																					{detailRecord
+																						?.metadata
+																						?.georeference
+																						.source ||
+																						"N/A"}
+																				</p>
+																			</div>
+																			<div>
+																				<p className="text-sm font-semibold">
+																					Intersection
+																				</p>
+																				<p className="text-sm">
+																					{detailRecord
+																						?.metadata
+																						?.georeference
+																						.intersection ||
+																						"N/A"}
+																				</p>
+																			</div>
+																			<div>
+																				<p className="text-sm font-semibold">
+																					Address
+																				</p>
+																				<p className="text-sm">
+																					{detailRecord
+																						?.metadata
+																						?.georeference
+																						.address ||
+																						"N/A"}
+																				</p>
+																			</div>
+																			<div>
+																				<p className="text-sm font-semibold">
+																					Trust
+																					Score
+																				</p>
+																				<p className="text-sm">
+																					{(
+																						detailRecord
+																							?.metadata
+																							?.georeference
+																							.trust_score *
+																						100
+																					).toFixed(
+																						0
+																					) +
+																						"%"}
+																				</p>
+																			</div>
+																			<div>
+																				<p className="text-sm font-semibold">
+																					Fallback
+																					Used
+																				</p>
+																				<p className="text-sm">
+																					{detailRecord
+																						?.metadata
+																						?.georeference
+																						.fallback_used
+																						? "Yes"
+																						: "No"}
+																				</p>
+																			</div>
+																		</div>
+																	</div>
 
-                            {detailRecord && detailRecord?.metadata?.georeference && (
-                              <div className="space-y-4">
-                                <div>
-                                  <h4 className="text-lg font-bold">Georeference Data</h4>
-                                  <div className="grid grid-cols-2 gap-2 mt-2">
-                                    <div>
-                                      <p className="text-sm font-semibold">Latitude</p>
-                                      <p className="text-sm">{detailRecord?.metadata?.georeference.lat.toFixed(6)}</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-semibold">Longitude</p>
-                                      <p className="text-sm">{detailRecord?.metadata?.georeference.lon.toFixed(6)}</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-semibold">Confidence</p>
-                                      <p className="text-sm">
-                                        {(detailRecord?.metadata?.georeference.conf * 100).toFixed(0) + "%"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-semibold">Source</p>
-                                      <p className="text-sm">{detailRecord?.metadata?.georeference.source || "N/A"}</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-semibold">Intersection</p>
-                                      <p className="text-sm">{detailRecord?.metadata?.georeference.intersection || "N/A"}</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-semibold">Address</p>
-                                      <p className="text-sm">{detailRecord?.metadata?.georeference.address || "N/A"}</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-semibold">Trust Score</p>
-                                      <p className="text-sm">
-                                        {(detailRecord?.metadata?.georeference.trust_score * 100).toFixed(0) + "%"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-semibold">Fallback Used</p>
-                                      <p className="text-sm">
-                                        {detailRecord?.metadata?.georeference.fallback_used ? "Yes" : "No"}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
+																	{detailRecord
+																		.metadata
+																		.bounding_box && (
+																		<div>
+																			<h4 className="text-lg font-bold">
+																				Bounding
+																				Box
+																			</h4>
+																			<div className="grid grid-cols-2 gap-2 mt-2">
+																				<div>
+																					<p className="text-sm font-semibold">
+																						{" "}
+																						Southwest
+																					</p>
+																					<p className="text-sm">
+																						{`${detailRecord.metadata.bounding_box.southwest.lat.toFixed(
+																							6
+																						)}, ${detailRecord.metadata.bounding_box.southwest.lng.toFixed(
+																							6
+																						)}`}
+																					</p>
+																				</div>
+																				<div>
+																					<p className="text-sm font-semibold">
+																						Northeast
+																					</p>
+																					<p className="text-sm">
+																						{`${detailRecord.metadata.bounding_box.northeast.lat.toFixed(
+																							6
+																						)}, ${detailRecord.metadata.bounding_box.northeast.lng.toFixed(
+																							6
+																						)}`}
+																					</p>
+																				</div>
+																			</div>
+																		</div>
+																	)}
 
-                                {detailRecord.metadata.bounding_box && (
-                                  <div>
-                                    <h4 className="text-lg font-bold">Bounding Box</h4>
-                                    <div className="grid grid-cols-2 gap-2 mt-2">
-                                      <div>
-                                        <p className="text-sm font-semibold"> Southwest</p>
-                                        <p className="text-sm">
-                                          {`${detailRecord.metadata.bounding_box.southwest.lat.toFixed(6)}, ${detailRecord.metadata.bounding_box.southwest.lng.toFixed(6)}`}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="text-sm font-semibold">Northeast</p>
-                                        <p className="text-sm">
-                                          {`${detailRecord.metadata.bounding_box.northeast.lat.toFixed(
-                                            6,
-                                          )}, ${detailRecord.metadata.bounding_box.northeast.lng.toFixed(6)}`}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
+																	{detailRecord
+																		.metadata
+																		.tiles && (
+																		<div>
+																			<h3 className="text-lg font-bold">
+																				Tiles
+																			</h3>
+																			<div className="grid grid-cols-1 gap-2 mt-2">
+																				{Object.entries(
+																					detailRecord
+																						.metadata
+																						.tiles
+																				).map(
+																					([
+																						key,
+																						tile,
+																					]) => (
+																						<div
+																							key={
+																								key
+																							}
+																							className="border p-2 rounded-md">
+																							<p className="text-sm font-semibold">
+																								{
+																									key
+																								}
+																							</p>
+																							<p className="text-sm whitespace-pre-line">
+																								{
+																									tile.text_blob
+																								}
+																							</p>
+																						</div>
+																					)
+																				)}
+																			</div>
+																		</div>
+																	)}
 
-                                {detailRecord.metadata.tiles && (
-                                  <div>
-                                    <h3 className="text-lg font-bold">Tiles</h3>
-                                    <div className="grid grid-cols-1 gap-2 mt-2">
-                                      {Object.entries(detailRecord.metadata.tiles).map(([key, tile]) => (
-                                        <div key={key} className="border p-2 rounded-md">
-                                          <p className="text-sm font-semibold">{key}</p>
-                                          <p className="text-sm whitespace-pre-line">{tile.text_blob}</p>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
+																	<div>
+																		<h3 className="text-lg font-bold">
+																			Summary
+																		</h3>
+																		<p className="text-sm whitespace-pre-line mt-2">
+																			{
+																				detailRecord.text_blob_summary
+																			}
+																		</p>
+																	</div>
 
-                                <div>
-                                  <h3 className="text-lg font-bold">Summary</h3>
-                                  <p className="text-sm whitespace-pre-line mt-2">{detailRecord.text_blob_summary}</p>
-                                </div>
-
-                                {detailRecord.text_blob_interpretation_labeled && (
-                                  <div>
-                                    <h3 className="text-lg font-bold">Interpretation</h3>
-                                    <p className="text-sm whitespace-pre-line mt-2">
-                                      {detailRecord.text_blob_interpretation_labeled}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </DialogContent>
-                        </Dialog>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    </>
-  )
+																	{detailRecord.text_blob_interpretation_labeled && (
+																		<div>
+																			<h3 className="text-lg font-bold">
+																				Interpretation
+																			</h3>
+																			<p className="text-sm whitespace-pre-line mt-2">
+																				{
+																					detailRecord.text_blob_interpretation_labeled
+																				}
+																			</p>
+																		</div>
+																	)}
+																</div>
+															)}
+													</DialogContent>
+												</Dialog>
+											</TableCell>
+										</TableRow>
+									);
+								})
+							)}
+						</TableBody>
+					</Table>
+				</div>
+			</div>
+		</>
+	);
 }
